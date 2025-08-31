@@ -317,8 +317,8 @@ class DataMigrationLog(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, 
                             default='running', verbose_name="状态")
     error_message = models.TextField(blank=True, null=True, verbose_name="错误信息")
-    # 修改：为现有数据提供默认值，新数据将使用创建时的时间
-    created_at = models.DateTimeField(default=timezone.now, verbose_name="创建时间")
+    # 修复：使用 auto_now_add 替代 default=timezone.now
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     
     def clean(self):
         """模型验证"""
@@ -346,9 +346,8 @@ class DataMigrationLog(models.Model):
         return 0.0
     
     def save(self, *args, **kwargs):
-        """保存前验证并设置创建时间"""
-        if not self.pk and not self.created_at:
-            self.created_at = timezone.now()
+        """保存前验证"""
+        # 移除创建时间设置逻辑，因为使用了 auto_now_add=True
         self.clean()
         super().save(*args, **kwargs)
     

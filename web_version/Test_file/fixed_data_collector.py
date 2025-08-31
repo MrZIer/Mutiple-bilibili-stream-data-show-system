@@ -10,7 +10,7 @@ import json
 from bilibili_api.live import LiveDanmaku
 
 # 使用简化的Redis保存器
-from simple_redis_saver import get_redis_saver
+from web_version.simple_redis_saver import get_redis_saver
 
 # 配置日志
 logging.basicConfig(

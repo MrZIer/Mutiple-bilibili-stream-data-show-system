@@ -89,7 +89,7 @@ def start_sync_scheduler():
             errors='replace',
             env=env
         )
-        
+
         print("✅ 数据同步调度器已启动 (每5分钟同步一次)")
         return sync_process
         

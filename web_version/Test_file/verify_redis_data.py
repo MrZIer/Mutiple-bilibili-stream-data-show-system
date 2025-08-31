@@ -1,4 +1,4 @@
-from simple_redis_saver import get_redis_saver
+from web_version.simple_redis_saver import get_redis_saver
 import json
 
 def verify_redis_data():

@@ -16,13 +16,13 @@ class Command(BaseCommand):
         parser.add_argument(
             '--interval',
             type=int,
-            default=300,  # 5分钟
+            default=5,  # 修改：从300秒改为5秒
             help='同步间隔时间（秒）'
         )
         parser.add_argument(
             '--batch-size',
             type=int,
-            default=100,
+            default=50,  # 修改：减少批处理大小以适应更频繁的同步
             help='批处理大小'
         )
     
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         try:
             # 主线程等待
             while self.running:
-                time.sleep(1)
+                time.sleep(0.1)  # 减少主线程睡眠时间，提高响应性
         except KeyboardInterrupt:
             pass
         finally:
@@ -56,33 +56,42 @@ class Command(BaseCommand):
     
     def sync_loop(self):
         """同步循环"""
+        sync_count = 0
         while self.running:
             try:
                 start_time = datetime.now()
-                self.stdout.write(f"🔄 [{start_time.strftime('%Y-%m-%d %H:%M:%S')}] 开始同步数据...")
+                sync_count += 1
+                
+                # 每10次同步显示一次详细信息，减少日志输出
+                if sync_count % 10 == 1:
+                    self.stdout.write(f"🔄 [{start_time.strftime('%Y-%m-%d %H:%M:%S')}] 开始同步数据 (第{sync_count}次)...")
+                    verbosity = 1
+                else:
+                    verbosity = 0
                 
                 # 执行同步命令
                 call_command(
                     'sync_redis_to_db',
                     data_type='all',
                     batch_size=self.batch_size,
-                    verbosity=0  # 减少输出
+                    verbosity=verbosity  # 控制输出详细程度
                 )
                 
                 end_time = datetime.now()
                 duration = (end_time - start_time).total_seconds()
                 
-                self.stdout.write(f"✅ 同步完成，耗时: {duration:.2f}秒")
+                if sync_count % 10 == 1:
+                    self.stdout.write(f"✅ 同步完成，耗时: {duration:.2f}秒")
                 
             except Exception as e:
                 self.stdout.write(f"❌ 同步失败: {e}")
                 logger.error(f"同步失败: {e}")
             
             # 等待下一次同步
-            for _ in range(self.interval):
+            for i in range(self.interval * 10):  # 0.1秒为单位的精细控制
                 if not self.running:
                     break
-                time.sleep(1)
+                time.sleep(0.1)
     
     def signal_handler(self, signum, frame):
         """信号处理器"""

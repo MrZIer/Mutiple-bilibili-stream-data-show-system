@@ -1,247 +1,264 @@
-# Bilibili Live Data Real-time Monitoring System
 
-A real-time monitoring system for Bilibili live streaming data that supports multi-room simultaneous monitoring, real-time collection of danmaku (comments), gifts, popularity and other data, with dual Y-axis visualization charts.
+## <a id="english"></a>🇺🇸 English Version
 
-## Features
+### Project Overview
 
-- 🎯 **Multi-room Monitoring**: Monitor multiple live rooms simultaneously
-- 💬 **Real-time Danmaku Collection**: Real-time acquisition of danmaku content and user information
-- 🎁 **Gift Data Statistics**: Statistics of gift quantities and values
-- 📊 **Dual Y-axis Visualization**: Independent display of danmaku and gift data trends
-- 💾 **JSON Data Storage**: Structured storage of all collected data
-- ⚡ **Real-time Updates**: 1-second interval chart and data updates
+This is a Django-based Bilibili live streaming data monitoring system that supports real-time collection of danmaku (bullet comments) and gift data, stores them in Redis cache and SQLite database, and provides a web interface for data visualization.
 
-## Project Structure
+### System Features
+
+- 🚀 **Real-time Data Collection** - Live crawling of danmaku and gift data from Bilibili streams
+- 📊 **Data Visualization** - Charts and dashboards showing data trends
+- 💾 **Dual Storage** - Redis cache + SQLite database persistence
+- 🔄 **Auto Sync** - Scheduled synchronization from Redis to database
+- 🌐 **Web Interface** - Intuitive management and viewing interface
+
+### System Architecture
+
+```mermaid
+graph TD
+    A[Bilibili Live Room] -->|Real-time Push| B[Data Collector]
+    B -->|Immediate Storage| C[Redis Cache]
+    C -->|Every 5 min| D[Data Synchronizer]
+    D -->|Persistence| E[SQLite Database]
+    C -->|Real-time Read| F[Django Web Interface]
+    E -->|Historical Query| F
+    F -->|User Access| G[Browser Display]
+```
+
+### Project Structure
 
 ```
-bilibili_data/
-├── spider_live_data/
-│   ├── live_data_visualizer.py    # Data visualization module
-│   ├── data_storage.py            # Data storage module
-│   ├── get_data_with_visualization.py  # Main program entry
-│   └── data/                      # Data storage directory
-├── live_data/                     # Historical data files
-├── README.md                      # Chinese documentation
-├── README_EN.md                   # English documentation
-└── requirements.txt               # Dependencies
+bilibili-live-monitor-django/
+├── manage.py                # Command-line utility for Django project
+├── requirements.txt         # Project dependencies list
+├── bilibili_monitor/        # Main Django application package
+│   ├── __init__.py          # Python package identifier
+│   ├── settings.py          # Django project configuration
+│   ├── urls.py              # Project URL routing configuration
+│   ├── wsgi.py              # WSGI server entry point
+│   └── asgi.py              # ASGI server entry point
+├── live_data/               # Live data processing application
+│   ├── __init__.py          # Python package identifier
+│   ├── admin.py             # Django admin backend registration
+│   ├── apps.py              # Application configuration
+│   ├── models.py            # Data model definitions
+│   ├── views.py             # View functions for request/response handling
+│   ├── urls.py              # Application URL routing configuration
+│   ├── tasks.py             # Background task processing
+│   ├── management/          # Custom management commands
+│   │   └── commands/
+│   │       ├── sync_redis_to_db.py     # Redis data sync command
+│   │       ├── start_sync_scheduler.py # Data sync scheduler
+│   │       └── check_redis_keys.py     # Redis data check command
+│   ├── migrations/          # Database migration files directory
+│   │   └── __init__.py      # Python package identifier
+│   └── templates/           # HTML template files
+│       └── live_data/
+│           ├── dashboard.html        # Dashboard template
+│           ├── danmaku_browser.html  # Danmaku browser template
+│           ├── room_list.html        # Room list template
+│           └── debug.html            # Debug page template
+├── static/                  # Static files (CSS, JS)
+│   ├── css/
+│   │   └── style.css        # Project stylesheet
+│   └── js/
+│       └── charts.js        # Chart visualization JavaScript code
+├── templates/               # Base template files
+│   └── base.html            # Base template for inheritance
+├── utils/                   # Utility function modules
+│   ├── __init__.py          # Python package identifier
+│   ├── bilibili_client.py   # Bilibili API interaction functions
+│   ├── redis_handler.py     # Redis data handling functions
+│   └── data_processor.py    # Data processing functions
+└── README.md                # Project documentation
 ```
 
-## Installation
+### Setup Instructions
 
-### Prerequisites
+#### 1. Requirements
 
-- Python 3.7+
-- Required packages listed in requirements.txt
+- **Python 3.7+**
+- **Redis server**
+- **Internet connection** (to access Bilibili API)
 
-### Install Dependencies
+#### 2. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd bilibili-live-monitor-django
+```
+
+#### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Or install manually:
+#### 4. Start Redis Service
+
 ```bash
-pip install bilibili-api matplotlib numpy asyncio
+# Windows (if using Redis installer)
+redis-server
+
+# Or using Docker
+docker run -d -p 6379:6379 redis:latest
+
+# Check Redis connection
+redis-cli ping
+# Should return PONG
 ```
 
-## Usage
+#### 5. Run Database Migrations
 
-1. **Configure Room IDs**
+```bash
+python manage.py migrate
+```
+
+#### 6. Start Development Server
+
+```bash
+python manage.py runserver
+```
+
+#### 7. Access the Application
+
+Open your browser and navigate to `http://127.0.0.1:8000/live/`
+
+### Usage Tutorial
+
+#### 🚀 Quick Start
+
+1. **Configure Monitoring Rooms**
    
-   Edit the room ID list in `get_data_with_visualization.py`:
+   Edit the `../web_version/multi_room_collector.py` file, find lines 787-793:
    ```python
-   room_ids = [6, 7720242]  # Replace with your target room IDs
+   # Method 2: Multiple room list
+   room_ids = [
+       1962481108,  # Room 1 you want to monitor
+       22889484,    # Room 2 you want to monitor
+       7758258,     # Room 3 you want to monitor
+       # You can continue adding more rooms...
+   ]
    ```
 
-2. **Run the Program**
+2. **Start the Complete System**
+   
+   Go back to the parent directory and run the one-click startup script:
    ```bash
-   cd spider_live_data
-   python get_data_with_visualization.py
+   cd ..
+   python setup.py
    ```
 
-3. **View Results**
-   - Real-time visualization window will open automatically
-   - Data files are saved in the `data/` directory as JSON format
+3. **View Real-time Data**
+   
+   Open your browser and visit: `http://localhost:8000/live/`
 
-## Data Format
+#### 📊 Main Feature Pages
 
-### JSON Storage Structure
+| Page | URL | Description |
+|------|-----|-------------|
+| **Main Dashboard** | `/live/` | System overview and real-time statistics |
+| **Danmaku Browser** | `/live/danmaku/` | Real-time viewing and searching of danmaku data |
+| **Gift Statistics** | `/live/gifts/` | View gift data and statistics |
+| **Room Management** | `/live/rooms/` | Manage monitored live rooms |
+| **Debug Page** | `/live/debug/` | System status check and debug information |
 
-```json
-{
-  "room_info": {
-    "room_id": 6,
-    "uname": "Streamer Name",
-    "title": "Stream Title",
-    "created_at": "2025-08-30T18:59:39.598094"
-  },
-  "data": {
-    "timestamps": ["2025-08-30T19:05:59.307459"],
-    "popularity": [9999],
-    "watched": [181948010],
-    "likes": [275274],
-    "total_danmaku_at_time": [346],
-    "total_gifts_at_time": [0]
-  },
-  "real_time": {
-    "current_popularity": 9999,
-    "current_watched": 181948010,
-    "current_likes": 275274,
-    "total_danmaku": 346,
-    "total_gifts": 0,
-    "last_update": "2025-08-30T19:06:01.469806"
-  },
-  "recent_danmaku": [...],
-  "recent_gifts": [...]
-}
+#### ⚙️ Management Commands
+
+```bash
+# Check Redis data
+python manage.py check_redis_keys --pattern "room:*" --limit 10
+
+# Manually sync data to database
+python manage.py sync_redis_to_db --data-type all
+
+# Start data sync scheduler
+python manage.py start_sync_scheduler --interval 300
+
+# Clean up expired data (optional)
+python manage.py cleanup_old_data --days 7
 ```
 
-### Data Fields Description
+#### 🔄 Data Sync Workflow
 
-- **room_info**: Basic room information
-- **data**: Time-series data (popularity, views, likes, cumulative danmaku/gifts)
-- **real_time**: Real-time status data
-- **recent_danmaku**: Recent danmaku records (last 100)
-- **recent_gifts**: Recent gift records (last 50)
+1. **Real-time Collection**: Data collector fetches live data from Bilibili API
+2. **Cache Storage**: Data is immediately stored in Redis cache
+3. **Scheduled Sync**: Redis data is synced to SQLite database every 5 minutes
+4. **Web Display**: View real-time and historical data through Django interface
 
-## Visualization Features
+#### 🎯 Room Selection Recommendations
 
-### Dashboard Layout
-
-- **Left Panel**: Dual Y-axis chart showing cumulative danmaku and gift counts
-  - Blue line (Left Y-axis): Cumulative danmaku count
-  - Green line (Right Y-axis): Cumulative gift count
-- **Middle Panel**: Real-time status information
-  - Room ID and data file name
-  - Current popularity, viewers, likes
-  - Cumulative statistics with growth rates
-  - Last update timestamp
-- **Right Panel**: Real-time danmaku scrolling display
-  - Latest 10 danmaku messages
-  - Timestamp and username information
-
-### Key Features
-
-- **Independent Scaling**: Each Y-axis scales independently for optimal data visualization
-- **Real-time Updates**: 1-second refresh rate
-- **Data Persistence**: All data saved to JSON files for later analysis
-- **Multi-room Support**: Monitor multiple streams simultaneously
-
-## API Reference
-
-### Core Classes
-
-#### `LiveDataVisualizer`
-Main visualization class handling real-time chart updates.
-
+**Recommended Configuration (Moderate popularity, reasonable data volume):**
 ```python
-visualizer = LiveDataVisualizer(room_ids)
-visualizer.start()  # Start visualization
+room_ids = [
+    1962481108,  # Test room
+    22889484,    # Medium popularity room
+    7758258,     # Active but not overloaded room
+]
 ```
 
-#### `DataStorage`
-Data persistence class managing JSON file operations.
-
+**Avoid Configuration (Excessive data volume):**
 ```python
-storage = DataStorage(data_dir="data")
-await storage.init_room_info(room_ids)
-storage.save_data(room_id, data_type, value, extra_data)
+# Not recommended - These rooms have massive data volume
+room_ids = [
+    6,        # Official live room - 1000+ danmaku per minute
+    17961,    # Extremely popular room - Massive data volume
+    1,        # Official room - High load
+]
 ```
 
-### Event Handlers
+#### 🔧 Performance Optimization Tips
 
-The system automatically handles various live stream events:
-- **Danmaku events**: User comments and messages
-- **Gift events**: Virtual gift donations
-- **Popularity updates**: Real-time viewer metrics
+- **Choose Rooms Wisely**: Avoid monitoring extremely popular rooms
+- **Adjust Sync Frequency**: Modify sync intervals based on data volume
+- **Regular Data Cleanup**: Delete expired danmaku and gift data
+- **Monitor Resource Usage**: Keep an eye on memory and disk space usage
 
-## Configuration
+### Troubleshooting
 
-### Customization Options
+#### Common Issues
 
-1. **Data Collection Interval**: Modify the animation interval in `live_data_visualizer.py`
-   ```python
-   animation.FuncAnimation(self.fig, self.animate, interval=1000)  # 1000ms = 1 second
-   ```
-
-2. **Data Retention**: Adjust the maximum number of data points stored in memory
-   ```python
-   deque(maxlen=30)  # Keep last 30 data points
-   ```
-
-3. **Chart Appearance**: Customize colors, fonts, and layout in the visualization module
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Network Connection Errors**
-   - Check your internet connection
-   - Verify room IDs are valid and streams are live
-
-2. **Missing Dependencies**
+1. **Redis Connection Failed**
    ```bash
-   pip install --upgrade bilibili-api matplotlib numpy
+   # Check Redis service status
+   redis-cli ping
+   
+   # If failed, start Redis service
+   redis-server
    ```
 
-3. **Permission Errors**
-   - Ensure write permissions for the data directory
-   - Run with appropriate user privileges
+2. **Django Startup Failed**
+   ```bash
+   # Check database migrations
+   python manage.py migrate
+   
+   # Check port usage
+   netstat -an | findstr 8000
+   ```
 
-4. **Performance Issues**
-   - Reduce the number of monitored rooms
-   - Increase the update interval
-   - Close unnecessary applications
+3. **Data Collection Errors**
+   - Verify room IDs are correct
+   - Check network connection
+   - Review collector logs
 
-## Future Roadmap
+4. **Encoding Errors**
+   ```bash
+   # Set UTF-8 encoding for Windows systems
+   set PYTHONIOENCODING=utf-8
+   python setup.py
+   ```
 
-- [ ] **Django Web Interface**: Web-based dashboard for remote monitoring
-- [ ] **Redis Caching**: High-performance data caching layer
-- [ ] **MySQL Database**: Persistent database storage for historical analysis
-- [ ] **ECharts Integration**: Advanced interactive chart library
-- [ ] **Data Analysis Features**: Statistical analysis and reporting tools
-- [ ] **Room Comparison**: Side-by-side comparison of multiple streams
-- [ ] **Alert System**: Notifications for significant events or milestones
-- [ ] **Export Functionality**: Data export in various formats (CSV, Excel, etc.)
-- [ ] **API Endpoints**: RESTful API for external integrations
+### Contributing
 
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow PEP 8 style guidelines
-- Add comments for complex logic
-- Include error handling for external API calls
-- Test with multiple room IDs before submitting
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [bilibili-api](https://github.com/Nemo2011/bilibili-api) - Python library for Bilibili API
-- [matplotlib](https://matplotlib.org/) - Plotting library for Python
-- [numpy](https://numpy.org/) - Numerical computing library
-
-## Contact
-
-If you have any questions or suggestions, please:
-- Open an issue on GitHub
-- Contact the maintainer: [Your Contact Information]
-
-## Disclaimer
-
-This project is for educational and research purposes only. Please respect Bilibili's terms of service and rate limits when using this tool. The authors are not responsible for any misuse of this software.
+Feel free to submit issues and pull requests to improve functionality and fix bugs.
 
 ---
 
-**Note**: This system monitors public live stream data only. No private or sensitive information is collected or stored.
+## License
+
+This project is open source. Please refer to the LICENSE file for details.
+
+## Contact
+
+For questions or support, please create an issue in the repository.
