@@ -1,0 +1,28 @@
+2025-08-31 15:15:17,016 - ServiceManager - INFO - Starting 数据收集器 with command: G:\Github_Project\bilibili_data\venv\Scripts\python.exe multi_room_collector.py
+2025-08-31 15:15:17,226 - ServiceManager - INFO - 数据收集器 started successfully with PID 35172
+2025-08-31 15:15:19,181 - ServiceManager - WARNING - 数据收集器 output contains error: Traceback (most recent call last):
+2025-08-31 15:15:19,182 - ServiceManager - WARNING - 数据收集器 output contains error: UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f3af' in position 0: illegal multibyte sequence
+2025-08-31 15:15:19,282 - ServiceManager - WARNING - 数据收集器 process stopped with return code 1 after 0:00:02.057453
+2025-08-31 15:15:19,283 - ServiceManager - INFO - Scheduling restart for 数据收集器 (attempt 1)
+2025-08-31 15:15:20,227 - ServiceManager - INFO - Starting Django服务器 with command: G:\Github_Project\bilibili_data\venv\Scripts\python.exe manage.py runserver 0.0.0.0:8000 --noreload
+2025-08-31 15:15:20,470 - ServiceManager - INFO - Django服务器 started successfully with PID 25200
+2025-08-31 15:15:24,284 - ServiceManager - INFO - Starting 数据收集器 with command: G:\Github_Project\bilibili_data\venv\Scripts\python.exe multi_room_collector.py
+2025-08-31 15:15:24,493 - ServiceManager - INFO - 数据收集器 started successfully with PID 19704
+2025-08-31 15:15:26,828 - ServiceManager - WARNING - 数据收集器 output contains error: Traceback (most recent call last):
+2025-08-31 15:15:26,829 - ServiceManager - WARNING - 数据收集器 output contains error: UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f3af' in position 0: illegal multibyte sequence
+2025-08-31 15:15:26,927 - ServiceManager - WARNING - 数据收集器 process stopped with return code 1 after 0:00:02.435130
+2025-08-31 15:15:26,928 - ServiceManager - INFO - Scheduling restart for 数据收集器 (attempt 2)
+2025-08-31 15:15:31,929 - ServiceManager - INFO - Starting 数据收集器 with command: G:\Github_Project\bilibili_data\venv\Scripts\python.exe multi_room_collector.py
+2025-08-31 15:15:32,144 - ServiceManager - INFO - 数据收集器 started successfully with PID 8536
+2025-08-31 15:15:34,267 - ServiceManager - WARNING - 数据收集器 output contains error: Traceback (most recent call last):
+2025-08-31 15:15:34,268 - ServiceManager - WARNING - 数据收集器 output contains error: UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f3af' in position 0: illegal multibyte sequence
+2025-08-31 15:15:34,361 - ServiceManager - WARNING - 数据收集器 process stopped with return code 1 after 0:00:02.217154
+2025-08-31 15:15:34,362 - ServiceManager - INFO - Scheduling restart for 数据收集器 (attempt 3)
+2025-08-31 15:15:39,363 - ServiceManager - INFO - Starting 数据收集器 with command: G:\Github_Project\bilibili_data\venv\Scripts\python.exe multi_room_collector.py
+2025-08-31 15:15:39,633 - ServiceManager - INFO - 数据收集器 started successfully with PID 33600
+2025-08-31 15:15:41,941 - ServiceManager - WARNING - 数据收集器 output contains error: Traceback (most recent call last):
+2025-08-31 15:15:41,942 - ServiceManager - WARNING - 数据收集器 output contains error: UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f3af' in position 0: illegal multibyte sequence
+2025-08-31 15:15:42,037 - ServiceManager - WARNING - 数据收集器 process stopped with return code 1 after 0:00:02.404314
+2025-08-31 15:15:42,037 - ServiceManager - ERROR - 数据收集器 has reached maximum restart limit (3)
+2025-08-31 15:16:53,261 - ServiceManager - INFO - All services stopped
+2025-08-31 15:16:53,262 - ServiceManager - WARNING - Django服务器 process stopped with return code 1 after 0:01:32.792785
