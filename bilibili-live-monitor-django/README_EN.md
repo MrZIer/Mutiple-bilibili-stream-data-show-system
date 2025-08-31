@@ -298,19 +298,5 @@ Issues and Pull Requests are welcome!
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-## 📞 Contact
-
-- Project URL: https://github.com/YOUR_USERNAME/bilibili-live-monitor
-- Issue Reports: https://github.com/YOUR_USERNAME/bilibili-live-monitor/issues
-- Email: your.email@example.com
-
-## 🙏 Acknowledgments
-
-- [bilibili-api](https://github.com/Nemo2011/bilibili-api) - Python wrapper for Bilibili API
-- [Django](https://www.djangoproject.com/) - Web framework
-- [Redis](https://redis.io/) - In-memory database
-- [Chart.js](https://www.chartjs.org/) - Chart library
-
----
 
 ⭐ If this project helps you, please give it a star!

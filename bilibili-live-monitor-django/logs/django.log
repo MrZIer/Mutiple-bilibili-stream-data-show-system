@@ -22180,3 +22180,273 @@ INFO 2025-08-31 15:24:21,803 danmaku_services 35432 21056 成功处理 3 个房间信息
 INFO 2025-08-31 15:25:21,829 danmaku_services 35432 36056 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
 INFO 2025-08-31 15:25:21,835 danmaku_services 35432 36056 Redis ping结果: True
 INFO 2025-08-31 15:25:21,859 danmaku_services 35432 36056 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:11,140 danmaku_services 36776 25544 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:11,146 danmaku_services 36776 25544 Redis ping结果: True
+INFO 2025-08-31 15:26:11,161 danmaku_services 36776 25544 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:20,788 danmaku_services 36776 8228 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:20,805 danmaku_services 36776 8228 Redis ping结果: True
+INFO 2025-08-31 15:26:20,813 danmaku_services 36776 8228 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:20,974 danmaku_services 36776 16964 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:20,983 danmaku_services 36776 16964 Redis ping结果: True
+INFO 2025-08-31 15:26:20,993 danmaku_services 36776 16964 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:20,995 danmaku_services 36776 16964 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,490 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,491 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,493 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,500 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,501 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:22,512 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.27ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.27, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,515 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:22,521 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,530 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:22,532 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,533 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,533 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:22,540 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,545 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:22,561 views 36776 36576 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 2.0, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,563 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,563 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,572 views 36776 36576 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:22,579 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,580 views 36776 9132 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.8ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 0.8, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,588 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,593 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:22,605 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.04ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 1.04, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,605 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:22,617 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,625 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:22,626 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,627 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,627 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:22,635 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,639 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:22,644 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,660 views 36776 36576 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 3, 'room_keys': 2, 'ping_time': 1.0, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,670 views 36776 9132 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.03ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 2, 'room_keys': 2, 'ping_time': 2.03, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,678 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,679 views 36776 36576 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:22,683 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.0, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,689 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,689 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:22,692 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,696 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,699 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:22,704 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,719 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.67ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 2.67, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,720 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,726 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,726 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,728 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:22,740 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.63ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.63, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,743 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,743 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:22,746 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,753 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,759 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:22,766 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:22,777 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.66ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.66, 'last_check': '15:26:22'}
+INFO 2025-08-31 15:26:22,778 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:22,778 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:23,493 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,494 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,495 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,500 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:23,509 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,516 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:23,516 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:23,530 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 5.93ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 2, 'room_keys': 2, 'ping_time': 5.93, 'last_check': '15:26:23'}
+INFO 2025-08-31 15:26:23,531 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:23,534 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,545 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:23,545 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:23,552 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:23,557 views 36776 21344 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.1ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 1.1, 'last_check': '15:26:23'}
+INFO 2025-08-31 15:26:23,564 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,574 views 36776 9132 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 2.0, 'last_check': '15:26:23'}
+INFO 2025-08-31 15:26:23,575 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:23,578 danmaku_services 36776 9132 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:23,578 views 36776 9132 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:23,603 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.57ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.57, 'last_check': '15:26:23'}
+INFO 2025-08-31 15:26:23,610 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:23,611 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:23,616 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,621 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:23,627 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:23,633 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:23,646 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.69ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.69, 'last_check': '15:26:23'}
+INFO 2025-08-31 15:26:23,648 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:23,648 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:27,270 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,272 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,272 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,280 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:27,282 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:27,282 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,287 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,304 views 36776 9132 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.95ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.95, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,313 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,320 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,320 danmaku_services 36776 9132 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,321 views 36776 9132 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:27,322 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:27,334 views 36776 21344 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.0, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,347 views 36776 36576 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 3.01ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 3.01, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,349 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,351 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,351 views 36776 36576 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:27,359 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,369 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.08ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.08, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,376 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,376 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:27,385 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,390 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,397 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,403 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,416 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.12ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.12, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,418 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,418 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:27,492 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,493 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,493 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,498 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,499 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:27,500 danmaku_services 36776 9132 Redis ping结果: True
+WARNING 2025-08-31 15:26:27,503 danmaku_services 36776 36576 Redis读写测试失败: {'host': 'localhost', 'port': 6379, 'db': 0}
+WARNING 2025-08-31 15:26:27,503 danmaku_services 36776 9132 Redis读写测试失败: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,510 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,511 danmaku_services 36776 36576 尝试连接Redis: {'host': '127.0.0.1', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,511 danmaku_services 36776 9132 尝试连接Redis: {'host': '127.0.0.1', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,520 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,520 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:27,520 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:27,531 views 36776 21344 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.09ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.09, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,537 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,552 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:27,554 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.64ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 2.64, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,564 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,564 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:27,567 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,567 views 36776 9132 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.93ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.93, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,569 danmaku_services 36776 9132 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,569 views 36776 9132 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:27,571 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,588 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.18ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.18, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,593 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,593 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:27,599 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,603 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,615 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:27,629 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:27,634 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.0, 'last_check': '15:26:27'}
+INFO 2025-08-31 15:26:27,635 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:27,636 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:28,498 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,498 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,499 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,504 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:28,505 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:28,507 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:28,510 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,521 views 36776 9132 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 2, 'room_keys': 2, 'ping_time': 2.0, 'last_check': '15:26:28'}
+INFO 2025-08-31 15:26:28,523 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:28,530 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,539 danmaku_services 36776 9132 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:28,539 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:28,549 views 36776 9132 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:28,554 views 36776 21344 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.19ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 3, 'room_keys': 2, 'ping_time': 2.19, 'last_check': '15:26:28'}
+INFO 2025-08-31 15:26:28,561 views 36776 36576 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.46ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.46, 'last_check': '15:26:28'}
+INFO 2025-08-31 15:26:28,563 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,566 danmaku_services 36776 36576 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:28,566 views 36776 36576 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:28,570 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:28,583 views 36776 21344 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 1.0, 'last_check': '15:26:28'}
+INFO 2025-08-31 15:26:28,588 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:28,588 views 36776 21344 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:28,596 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,601 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:28,605 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:28,611 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:28,622 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.93ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 2, 'room_keys': 2, 'ping_time': 0.93, 'last_check': '15:26:28'}
+INFO 2025-08-31 15:26:28,623 danmaku_services 36776 21344 成功处理 0 个房间信息
+INFO 2025-08-31 15:26:28,623 views 36776 21344 房间列表API - 获取到 0 个房间
+INFO 2025-08-31 15:26:29,493 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,494 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,494 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,501 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:29,501 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:29,503 danmaku_services 36776 9132 Redis ping结果: True
+WARNING 2025-08-31 15:26:29,506 danmaku_services 36776 36576 Redis读写测试失败: {'host': 'localhost', 'port': 6379, 'db': 0}
+WARNING 2025-08-31 15:26:29,507 danmaku_services 36776 9132 Redis读写测试失败: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,518 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,518 danmaku_services 36776 36576 尝试连接Redis: {'host': '127.0.0.1', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,518 danmaku_services 36776 9132 尝试连接Redis: {'host': '127.0.0.1', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,528 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:29,532 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:29,534 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:29,545 views 36776 21344 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.7ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 9, 'room_keys': 8, 'ping_time': 2.7, 'last_check': '15:26:29'}
+INFO 2025-08-31 15:26:29,556 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,573 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:29,574 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 2.09ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 8, 'room_keys': 8, 'ping_time': 2.09, 'last_check': '15:26:29'}
+INFO 2025-08-31 15:26:29,588 views 36776 9132 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.06ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 8, 'room_keys': 8, 'ping_time': 1.06, 'last_check': '15:26:29'}
+INFO 2025-08-31 15:26:29,602 danmaku_services 36776 9132 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:29,602 views 36776 9132 房间列表API - 获取到 3 个房间
+INFO 2025-08-31 15:26:29,604 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:29,604 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:29,607 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,613 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:29,626 views 36776 9132 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 8, 'room_keys': 8, 'ping_time': 0.0, 'last_check': '15:26:29'}
+INFO 2025-08-31 15:26:29,640 danmaku_services 36776 9132 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:29,640 views 36776 9132 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:29,646 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,660 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:29,665 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:29,670 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:29,681 views 36776 9132 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.53ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 8, 'room_keys': 8, 'ping_time': 1.53, 'last_check': '15:26:29'}
+INFO 2025-08-31 15:26:29,696 danmaku_services 36776 9132 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:29,696 views 36776 9132 房间列表API - 获取到 3 个房间
+INFO 2025-08-31 15:26:30,494 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,495 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,496 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,502 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:30,506 danmaku_services 36776 21344 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,513 danmaku_services 36776 21344 Redis ping结果: True
+INFO 2025-08-31 15:26:30,524 views 36776 21344 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.57M', 'connected_clients': 5, 'total_keys': 8, 'room_keys': 8, 'ping_time': 0.0, 'last_check': '15:26:30'}
+INFO 2025-08-31 15:26:30,526 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:30,527 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:30,536 danmaku_services 36776 9132 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,545 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 8, 'room_keys': 8, 'ping_time': 1.0, 'last_check': '15:26:30'}
+INFO 2025-08-31 15:26:30,550 danmaku_services 36776 21344 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:30,551 views 36776 21344 房间列表API - 获取到 3 个房间
+INFO 2025-08-31 15:26:30,554 danmaku_services 36776 9132 Redis ping结果: True
+INFO 2025-08-31 15:26:30,571 views 36776 9132 Redis状态检查API - 状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.0ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.55M', 'connected_clients': 4, 'total_keys': 8, 'room_keys': 8, 'ping_time': 0.0, 'last_check': '15:26:30'}
+INFO 2025-08-31 15:26:30,573 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:30,574 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:30,580 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,585 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:30,595 views 36776 36576 系统统计API - Redis状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 0.97ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 8, 'room_keys': 8, 'ping_time': 0.97, 'last_check': '15:26:30'}
+INFO 2025-08-31 15:26:30,614 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:30,615 views 36776 36576 系统统计API - 获取统计数据成功
+INFO 2025-08-31 15:26:30,620 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,624 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:30,630 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:30,635 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:30,644 views 36776 36576 房间列表API - Redis连接状态: {'status': 'connected', 'message': 'Redis服务正常运行 (ping: 1.26ms)', 'redis_version': '8.2.1', 'used_memory_human': '1.53M', 'connected_clients': 3, 'total_keys': 8, 'room_keys': 8, 'ping_time': 1.26, 'last_check': '15:26:30'}
+INFO 2025-08-31 15:26:30,652 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:30,653 views 36776 36576 房间列表API - 获取到 3 个房间
+INFO 2025-08-31 15:26:31,371 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:31,392 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:31,412 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:31,432 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:32,594 danmaku_services 36776 36576 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:32,599 danmaku_services 36776 36576 Redis ping结果: True
+INFO 2025-08-31 15:26:32,620 danmaku_services 36776 36576 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:33,560 danmaku_services 36776 25168 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:33,566 danmaku_services 36776 25168 Redis ping结果: True
+INFO 2025-08-31 15:26:33,589 danmaku_services 36776 25168 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:43,624 danmaku_services 36776 34196 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:43,640 danmaku_services 36776 34196 Redis ping结果: True
+INFO 2025-08-31 15:26:43,666 danmaku_services 36776 34196 成功处理 3 个房间信息
+INFO 2025-08-31 15:26:53,701 danmaku_services 36776 35004 尝试连接Redis: {'host': 'localhost', 'port': 6379, 'db': 0}
+INFO 2025-08-31 15:26:53,719 danmaku_services 36776 35004 Redis ping结果: True
+INFO 2025-08-31 15:26:53,740 danmaku_services 36776 35004 成功处理 3 个房间信息
