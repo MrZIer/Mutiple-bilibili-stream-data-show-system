@@ -469,9 +469,9 @@
                         <div class="room-item {% if room.live_status == 1 %}live{% elif room.live_status == 2 %}round{% else %}offline{% endif %}" data-room-id="{{ room.room_id }}">
                             <!-- 直播状态标识 -->
                             <div class="room-status">
-                                {% if room.live_status == 1 %}
+                                {% if room.live_status == 0 %}
                                     <span class="status-live">🔴 直播中</span>
-                                {% elif room.live_status == 2 %}
+                                {% elif room.live_status == 1 %}
                                     <span class="status-round">🔄 轮播</span>
                                 {% else %}
                                     <span class="status-offline">⚫ 离线</span>
