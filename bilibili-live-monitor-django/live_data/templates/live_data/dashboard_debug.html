@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统调试 - Bilibili 直播监控</title>
+    <style>
+        body { 
+            font-family: 'Microsoft YaHei', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f5f5f5; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { 
+            background: #333; 
+            color: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+        }
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .error { color: #d32f2f; background: #ffebee; padding: 15px; border-radius: 4px; }
+        .success { color: #388e3c; background: #e8f5e8; padding: 15px; border-radius: 4px; }
+        .info { background: #f5f5f5; padding: 15px; border-radius: 4px; font-family: monospace; }
+        pre { background: #f8f8f8; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .btn { 
+            padding: 8px 16px; 
+            background: #007cba; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            margin: 5px; 
+        }
+        .btn:hover { background: #005a8b; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 系统调试页面</h1>
+            <p>实时监控系统状态和数据</p>
+            <p>当前时间: {{ now|date:"Y-m-d H:i:s" }}</p>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="card">
+            <h3>🚀 快速操作</h3>
+            <a href="/live/" class="btn">← 返回仪表板</a>
+            <button onclick="testRedisConnection()" class="btn">测试Redis连接</button>
+            <button onclick="loadSystemStats()" class="btn">加载系统统计</button>
+            <button onclick="loadRoomsList()" class="btn">加载房间列表</button>
+            <button onclick="loadDebugInfo()" class="btn">加载调试信息</button>
+        </div>
+
+        <!-- 系统状态 -->
+        <div class="card">
+            <h3>📊 系统状态</h3>
+            {% if error %}
+                <div class="error">
+                    <strong>错误:</strong> {{ error }}
+                </div>
+            {% else %}
+                <div class="success">系统正常运行</div>
+            {% endif %}
+            
+            {% if system_stats %}
+                <div class="info">
+                    <h4>系统统计:</h4>
+                    <ul>
+                        <li>Redis状态: <strong>{{ system_stats.redis_status }}</strong></li>
+                        <li>总房间数: <strong>{{ system_stats.total_rooms }}</strong></li>
+                        <li>活跃房间: <strong>{{ system_stats.active_rooms }}</strong></li>
+                        <li>总弹幕数: <strong>{{ system_stats.total_danmaku }}</strong></li>
+                        <li>总礼物数: <strong>{{ system_stats.total_gifts }}</strong></li>
+                        <li>认证用户: <strong>{{ system_stats.verified_users|default:0 }}</strong></li>
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <div id="dynamic-status"></div>
+        </div>
+
+        <!-- 房间列表 -->
+        <div class="card">
+            <h3>🏠 房间列表 (前10个)</h3>
+            {% if active_rooms %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>房间ID</th>
+                            <th>UP主</th>
+                            <th>标题</th>
+                            <th>状态</th>
+                            <th>在线人数</th>
+                            <th>弹幕数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for room in active_rooms %}
+                        <tr>
+                            <td>{{ room.room_id }}</td>
+                            <td>{{ room.uname|default:"未知" }}</td>
+                            <td>{{ room.title|default:"无标题"|truncatechars:30 }}</td>
+                            <td>
+                                {% if room.live_status == 1 %}
+                                    <span style="color: green;">🔴 直播中</span>
+                                {% elif room.live_status == 2 %}
+                                    <span style="color: orange;">🔄 轮播</span>
+                                {% else %}
+                                    <span style="color: gray;">⚫ 离线</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ room.online|default:0 }}</td>
+                            <td>{{ room.danmaku_count|default:0 }}</td>
+                            <td>
+                                <a href="/live/room/{{ room.room_id }}/" class="btn" style="font-size: 12px;">查看</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="info">暂无房间数据</div>
+            {% endif %}
+            
+            <div id="dynamic-rooms"></div>
+        </div>
+
+        <!-- 调试信息 -->
+        <div class="card">
+            <h3>🐛 调试信息</h3>
+            {% if debug_info %}
+                <pre>{{ debug_info|pprint }}</pre>
+            {% endif %}
+            <div id="dynamic-debug"></div>
+        </div>
+
+        <!-- API测试结果 -->
+        <div class="card">
+            <h3>🔍 API测试结果</h3>
+            <div id="api-results"></div>
+        </div>
+    </div>
+
+    <script>
+        // 显示结果的通用函数
+        function showResult(containerId, title, data, isError = false) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const className = isError ? 'error' : 'success';
+            const emoji = isError ? '❌' : '✅';
+            
+            container.innerHTML += `
+                <div class="${className}" style="margin: 10px 0;">
+                    <h4>${emoji} ${title}</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        // 测试Redis连接
+        async function testRedisConnection() {
+            try {
+                const response = await fetch('/live/api/redis/status/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('dynamic-status', 'Redis连接测试', data.data);
+                } else {
+                    showResult('dynamic-status', 'Redis连接失败', data, true);
+                }
+            } catch (error) {
+                showResult('dynamic-status', 'Redis连接异常', { error: error.message }, true);
+            }
+        }
+
+        // 加载系统统计
+        async function loadSystemStats() {
+            try {
+                const response = await fetch('/live/api/system/stats/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('dynamic-status', '系统统计数据', data.data);
+                } else {
+                    showResult('dynamic-status', '系统统计失败', data, true);
+                }
+            } catch (error) {
+                showResult('dynamic-status', '系统统计异常', { error: error.message }, true);
+            }
+        }
+
+        // 加载房间列表
+        async function loadRoomsList() {
+            try {
+                const response = await fetch('/live/api/rooms/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const rooms = data.data.rooms.slice(0, 5); // 只显示前5个
+                    showResult('dynamic-rooms', '房间列表数据', { 
+                        count: data.data.rooms.length, 
+                        sample: rooms 
+                    });
+                } else {
+                    showResult('dynamic-rooms', '房间列表失败', data, true);
+                }
+            } catch (error) {
+                showResult('dynamic-rooms', '房间列表异常', { error: error.message }, true);
+            }
+        }
+
+        // 加载调试信息
+        async function loadDebugInfo() {
+            try {
+                const response = await fetch('/live/api/debug/all/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('dynamic-debug', '综合调试信息', data.data);
+                } else {
+                    showResult('dynamic-debug', '调试信息失败', data, true);
+                }
+            } catch (error) {
+                showResult('dynamic-debug', '调试信息异常', { error: error.message }, true);
+            }
+        }
+
+        // 页面加载完成后自动测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('调试页面加载完成');
+            
+            // 延迟1秒后自动测试Redis连接
+            setTimeout(testRedisConnection, 1000);
+        });
+    </script>
+</body>
+</html>

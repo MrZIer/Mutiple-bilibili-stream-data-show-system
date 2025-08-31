@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilibili 直播数据监控</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-connected { border-left: 5px solid #4caf50; }
+        .status-error { border-left: 5px solid #f44336; }
+        .status-warning { border-left: 5px solid #ff9800; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .stat-item { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #007cba; }
+        .stat-label { color: #666; font-size: 0.9em; }
+        .room-item { padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; }
+        .room-name { font-weight: bold; margin-bottom: 5px; }
+        .room-stats { color: #666; font-size: 0.9em; margin: 5px 0; }
+        .btn { padding: 8px 16px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; margin: 2px; }
+        .btn:hover { background: #005a8b; }
+        .error-message { background: #ffebee; border: 1px solid #ffcdd2; padding: 15px; border-radius: 4px; color: #c62828; margin: 10px 0; }
+        .success-message { background: #e8f5e8; border: 1px solid #c8e6c9; padding: 15px; border-radius: 4px; color: #2e7d32; margin: 10px 0; }
+        .auto-refresh { display: inline-block; margin-left: 10px; padding: 5px 10px; background: #4caf50; color: white; border-radius: 4px; font-size: 0.8em; }
+        .loading { text-align: center; color: #666; padding: 20px; }
+        .debug-info { background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+        
+        /* 实时更新动画效果 */
+        .updating { opacity: 0.8; transition: opacity 0.3s; }
+        .stat-number.updated { 
+            animation: pulse 0.5s ease-in-out;
+            color: #4caf50;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Bilibili 直播数据监控中心</h1>
+            <p>实时监控和分析直播间弹幕、礼物数据</p>
+            <p>
+                <small>页面加载时间: {{ now|date:"Y-m-d H:i:s" }}</small>
+                <span class="auto-refresh" id="refresh-indicator">⏱️ 自动刷新: 1秒</span>
+            </p>
+        </div>
+
+        <!-- 系统状态卡片 -->
+        <div class="status-card {% if system_stats.redis_status == 'connected' %}status-connected{% elif system_stats.redis_status == 'error' %}status-error{% else %}status-warning{% endif %}">
+            <h3>🔗 系统状态</h3>
+            
+            {% if system_stats %}
+                <p><strong>Redis状态:</strong> 
+                    {% if system_stats.redis_status == 'connected' %}
+                        <span style="color: green;">✅ {{ system_stats.redis_message|default:"连接正常" }}</span>
+                    {% elif system_stats.redis_status == 'error' %}
+                        <span style="color: red;">❌ {{ system_stats.redis_message|default:"连接错误" }}</span>
+                    {% else %}
+                        <span style="color: orange;">⚠️ {{ system_stats.redis_message|default:"状态检查中..." }}</span>
+                    {% endif %}
+                </p>
+                
+                <div id="dynamic-status" style="margin-top: 10px;">
+                    <p>🔄 实时状态: <span id="live-status">检查中...</span></p>
+                    <p>⏰ 最后更新: <span id="last-update">{{ now|date:"H:i:s" }}</span></p>
+                </div>
+                
+                {% if system_stats.redis_status != 'connected' %}
+                    <div class="error-message">
+                        <strong>📋 解决步骤：</strong>
+                        <ol>
+                            <li>检查Redis服务: <code>redis-cli ping</code></li>
+                            <li>启动Redis: <code>redis-server</code></li>
+                            <li>或使用Docker: <code>docker run -d -p 6379:6379 redis:latest</code></li>
+                            <li>启动数据收集器: <code>cd web_version && python real_time_collector.py 1962481108</code></li>
+                        </ol>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p><span style="color: red;">❌ 无法获取系统状态</span></p>
+                <div id="dynamic-status"></div>
+            {% endif %}
+        </div>
+
+        <!-- 系统统计卡片 -->
+        <div class="card">
+            <h3>📈 系统统计 <small id="stats-indicator" style="color: #4caf50;">🔄 实时更新</small></h3>
+            
+            {% if system_stats %}
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-rooms">{{ system_stats.total_rooms|default:0 }}</div>
+                        <div class="stat-label">总房间数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="active-rooms">{{ system_stats.active_rooms|default:0 }}</div>
+                        <div class="stat-label">活跃房间</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-danmaku">{{ system_stats.total_danmaku|default:0|floatformat:0 }}</div>
+                        <div class="stat-label">总弹幕数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-gifts">{{ system_stats.total_gifts|default:0|floatformat:0 }}</div>
+                        <div class="stat-label">总礼物数</div>
+                    </div>
+                </div>
+            {% else %}
+                <div id="dynamic-stats">
+                    <div class="loading">🔄 正在加载统计数据...</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="grid">
+            <!-- 活跃房间 -->
+            <div class="card">
+                <h3>🏠 活跃房间 <small id="rooms-indicator" style="color: #4caf50;">🔄 实时更新</small></h3>
+                <div id="rooms-container">
+                    {% if active_rooms %}
+                        {% for room in active_rooms %}
+                        <div class="room-item">
+                            <div class="room-name">{{ room.uname|default:"未知主播" }} ({{ room.room_id }})</div>
+                            <div class="room-stats">
+                                💬 {{ room.danmaku_count|default:0|floatformat:0 }} 弹幕 | 
+                                🎁 {{ room.total_gifts|default:0|floatformat:0 }} 礼物 | 
+                                👥 {{ room.popularity|default:0|floatformat:0 }} 人气
+                            </div>
+                            <a href="/live/room/{{ room.room_id }}/" class="btn">查看详情</a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div id="dynamic-rooms">
+                            <div class="loading">🔄 正在加载房间数据...</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 快速操作 -->
+            <div class="card">
+                <h3>⚡ 快速操作</h3>
+                <a href="/live/danmaku/" class="btn">🎬 弹幕浏览器</a>
+                <a href="/live/debug/" class="btn">🔧 调试页面</a>
+                <a href="/admin/" class="btn">⚙️ 管理后台</a>
+                
+                <h4>🛠️ 系统工具</h4>
+                <button onclick="refreshAllData()" class="btn">🔄 刷新数据</button>
+                <button onclick="checkRedisStatus()" class="btn">🔗 检查Redis</button>
+                <button onclick="toggleAutoRefresh()" class="btn" id="auto-refresh-btn">⏸️ 暂停自动刷新</button>
+                
+                <div id="operation-result" style="margin-top: 10px;"></div>
+                
+                <h4>📊 更新频率控制</h4>
+                <div style="margin: 10px 0;">
+                    <label>更新间隔: </label>
+                    <select id="refresh-interval-select" onchange="changeRefreshInterval()">
+                        <option value="1000" selected>1秒</option>
+                        <option value="2000">2秒</option>
+                        <option value="5000">5秒</option>
+                        <option value="10000">10秒</option>
+                        <option value="30000">30秒</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 调试信息 -->
+        {% if debug_info %}
+        <div class="debug-info">
+            <strong>🐛 调试信息:</strong><br>
+            {% for key, value in debug_info.items %}
+                {{ key }}: {{ value }}<br>
+            {% endfor %}
+            <div id="dynamic-debug"></div>
+        </div>
+        {% endif %}
+
+        <!-- 错误信息 -->
+        {% if error %}
+        <div class="error-message">
+            <strong>❌ 错误信息:</strong> {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 确保CSRF token可用 -->
+    {% csrf_token %}
+    
+    <script>
+        // 全局变量
+        let lastUpdateTime = new Date();
+        let updateInterval = null;
+        let autoRefreshEnabled = true;
+        let refreshIntervalMs = 1000; // 默认1秒刷新
+        let updateCounter = 0;
+        
+        // 存储上次的数据，用于检测变化
+        let lastStats = {
+            total_rooms: 0,
+            active_rooms: 0,
+            total_danmaku: 0,
+            total_gifts: 0
+        };
+        
+        // 获取CSRF token
+        function getCSRFToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            return token ? token.value : '';
+        }
+        
+        // 更新调试信息
+        function updateDebugInfo(info) {
+            const debugDiv = document.getElementById('dynamic-debug');
+            if (debugDiv) {
+                const timestamp = new Date().toLocaleString();
+                debugDiv.innerHTML += `<br>JS更新 ${timestamp}: ${JSON.stringify(info)}`;
+                
+                // 限制调试信息行数
+                const lines = debugDiv.innerHTML.split('<br>');
+                if (lines.length > 20) {
+                    debugDiv.innerHTML = lines.slice(-20).join('<br>');
+                }
+            }
+        }
+        
+        // 更新页面指示器
+        function updateIndicators() {
+            const now = new Date().toLocaleTimeString();
+            
+            // 更新最后更新时间
+            const lastUpdateElement = document.getElementById('last-update');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = now;
+            }
+            
+            // 更新状态指示器
+            document.getElementById('stats-indicator').textContent = `🔄 已更新 ${now}`;
+            document.getElementById('rooms-indicator').textContent = `🔄 已更新 ${now}`;
+            
+            updateCounter++;
+        }
+        
+        // 动画效果
+        function animateStatUpdate(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            if (element && element.textContent !== newValue) {
+                element.classList.add('updated');
+                element.textContent = newValue;
+                
+                setTimeout(() => {
+                    element.classList.remove('updated');
+                }, 500);
+                
+                return true; // 有更新
+            }
+            return false; // 无更新
+        }
+        
+        // 检查Redis状态
+        async function checkRedisStatus() {
+            const resultDiv = document.getElementById('operation-result');
+            const liveStatusDiv = document.getElementById('live-status');
+            
+            resultDiv.innerHTML = '🔄 检查Redis状态...';
+            updateDebugInfo({action: 'check_redis', timestamp: new Date()});
+            
+            try {
+                const response = await fetch('/live/api/redis/status/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (liveStatusDiv) {
+                        liveStatusDiv.innerHTML = `<span style="color: green;">✅ ${data.data.message}</span>`;
+                    }
+                    resultDiv.innerHTML = '<span style="color: green;">✅ Redis连接正常</span>';
+                    updateDebugInfo({redis_check: 'success', message: data.data.message});
+                    
+                    // Redis正常，加载其他数据
+                    await loadSystemStats();
+                    await loadRoomsList();
+                    
+                } else {
+                    if (liveStatusDiv) {
+                        liveStatusDiv.innerHTML = `<span style="color: red;">❌ ${data.error}</span>`;
+                    }
+                    resultDiv.innerHTML = `<span style="color: red;">❌ ${data.error}</span>`;
+                    updateDebugInfo({redis_check: 'failed', error: data.error});
+                }
+                
+            } catch (error) {
+                if (liveStatusDiv) {
+                    liveStatusDiv.innerHTML = `<span style="color: red;">❌ 请求失败</span>`;
+                }
+                resultDiv.innerHTML = `<span style="color: red;">❌ ${error.message}</span>`;
+                updateDebugInfo({redis_check: 'exception', error: error.message});
+            }
+        }
+        
+        // 加载系统统计
+        async function loadSystemStats() {
+            updateDebugInfo({action: 'load_stats', timestamp: new Date()});
+            
+            try {
+                const response = await fetch('/live/api/system/stats/');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.stats) {
+                    const stats = data.data.stats;
+                    let hasUpdates = false;
+                    
+                    // 更新统计数字，并检测变化
+                    hasUpdates |= animateStatUpdate('total-rooms', stats.total_rooms || 0);
+                    hasUpdates |= animateStatUpdate('active-rooms', stats.active_rooms || 0);
+                    hasUpdates |= animateStatUpdate('total-danmaku', (stats.total_danmaku || 0).toLocaleString());
+                    hasUpdates |= animateStatUpdate('total-gifts', (stats.total_gifts || 0).toLocaleString());
+                    
+                    // 更新Redis状态
+                    const liveStatusDiv = document.getElementById('live-status');
+                    if (liveStatusDiv) {
+                        if (stats.redis_status === 'connected') {
+                            liveStatusDiv.innerHTML = `<span style="color: green;">✅ ${stats.redis_message}</span>`;
+                        } else {
+                            liveStatusDiv.innerHTML = `<span style="color: red;">❌ ${stats.redis_message}</span>`;
+                        }
+                    }
+                    
+                    updateDebugInfo({
+                        stats_update: 'success', 
+                        stats: stats,
+                        has_changes: hasUpdates,
+                        update_count: updateCounter
+                    });
+                    
+                    // 保存当前数据
+                    lastStats = stats;
+                    return true;
+                    
+                } else {
+                    // 显示在动态统计区域
+                    const dynamicStats = document.getElementById('dynamic-stats');
+                    if (dynamicStats) {
+                        dynamicStats.innerHTML = '<p style="color: orange;">⚠️ 无法获取最新统计数据</p>';
+                    }
+                    updateDebugInfo({stats_update: 'no_data'});
+                    return false;
+                }
+                
+            } catch (error) {
+                updateDebugInfo({stats_update: 'error', error: error.message});
+                return false;
+            }
+        }
+        
+        // 加载房间列表
+        async function loadRoomsList() {
+            updateDebugInfo({action: 'load_rooms', timestamp: new Date()});
+            
+            try {
+                const response = await fetch('/live/api/rooms/');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.rooms) {
+                    const rooms = data.data.rooms;
+                    const dynamicRooms = document.getElementById('dynamic-rooms');
+                    const roomsContainer = document.getElementById('rooms-container');
+                    
+                    if (rooms.length > 0) {
+                        const roomsHtml = rooms.slice(0, 10).map(room => `
+                            <div class="room-item">
+                                <div class="room-name">${room.uname || '未知主播'} (${room.room_id})</div>
+                                <div class="room-stats">
+                                    💬 ${(room.danmaku_count || 0).toLocaleString()} 弹幕 | 
+                                    🎁 ${(room.total_gifts || 0).toLocaleString()} 礼物 | 
+                                    👥 ${(room.popularity || 0).toLocaleString()} 人气
+                                </div>
+                                <a href="/live/room/${room.room_id}/" class="btn">查看详情</a>
+                            </div>
+                        `).join('');
+                        
+                        if (dynamicRooms) {
+                            dynamicRooms.innerHTML = roomsHtml;
+                        } else if (roomsContainer) {
+                            roomsContainer.innerHTML = roomsHtml;
+                        }
+                        
+                        updateDebugInfo({rooms_update: 'success', count: rooms.length});
+                        return true;
+                    }
+                    
+                } else {
+                    updateDebugInfo({rooms_update: 'no_data'});
+                    return false;
+                }
+                
+            } catch (error) {
+                updateDebugInfo({rooms_update: 'error', error: error.message});
+                return false;
+            }
+        }
+        
+        // 刷新所有数据
+        async function refreshAllData() {
+            // 添加更新中的视觉反馈
+            document.body.classList.add('updating');
+            
+            const resultDiv = document.getElementById('operation-result');
+            if (resultDiv) {
+                resultDiv.innerHTML = '🔄 正在刷新所有数据...';
+            }
+            
+            updateDebugInfo({action: 'refresh_all', timestamp: new Date()});
+            
+            try {
+                // 并行执行所有更新任务
+                const [redisResult, statsResult, roomsResult] = await Promise.all([
+                    checkRedisStatus().then(() => true).catch(() => false),
+                    loadSystemStats(),
+                    loadRoomsList()
+                ]);
+                
+                // 更新指示器
+                updateIndicators();
+                
+                if (resultDiv) {
+                    const successCount = [redisResult, statsResult, roomsResult].filter(Boolean).length;
+                    resultDiv.innerHTML = `✅ 数据刷新完成 (${successCount}/3 成功)`;
+                }
+                
+                updateDebugInfo({
+                    refresh_all: 'completed',
+                    results: {redis: redisResult, stats: statsResult, rooms: roomsResult}
+                });
+                
+            } catch (error) {
+                if (resultDiv) {
+                    resultDiv.innerHTML = `❌ 刷新失败: ${error.message}`;
+                }
+                updateDebugInfo({refresh_all: 'error', error: error.message});
+            } finally {
+                // 移除更新中的视觉反馈
+                document.body.classList.remove('updating');
+            }
+        }
+        
+        // 改变刷新间隔
+        function changeRefreshInterval() {
+            const select = document.getElementById('refresh-interval-select');
+            refreshIntervalMs = parseInt(select.value);
+            
+            const indicator = document.getElementById('refresh-indicator');
+            indicator.textContent = `⏱️ 自动刷新: ${refreshIntervalMs/1000}秒`;
+            
+            // 重启自动刷新
+            if (autoRefreshEnabled) {
+                startAutoRefresh();
+            }
+            
+            updateDebugInfo({interval_changed: refreshIntervalMs});
+        }
+        
+        // 切换自动刷新
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            const btn = document.getElementById('auto-refresh-btn');
+            const indicator = document.getElementById('refresh-indicator');
+            
+            if (autoRefreshEnabled) {
+                btn.textContent = '⏸️ 暂停自动刷新';
+                indicator.textContent = `⏱️ 自动刷新: ${refreshIntervalMs/1000}秒`;
+                indicator.style.background = '#4caf50';
+                startAutoRefresh();
+            } else {
+                btn.textContent = '▶️ 启动自动刷新';
+                indicator.textContent = '⏸️ 自动刷新已暂停';
+                indicator.style.background = '#ff9800';
+                if (updateInterval) {
+                    clearInterval(updateInterval);
+                    updateInterval = null;
+                }
+            }
+            
+            updateDebugInfo({auto_refresh: autoRefreshEnabled, interval: refreshIntervalMs});
+        }
+        
+        // 启动自动刷新
+        function startAutoRefresh() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            // 使用动态刷新间隔
+            updateInterval = setInterval(() => {
+                if (autoRefreshEnabled && document.visibilityState === 'visible') {
+                    refreshAllData();
+                }
+            }, refreshIntervalMs); // 使用用户选择的间隔
+            
+            updateDebugInfo({auto_refresh_started: true, interval_ms: refreshIntervalMs});
+        }
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Dashboard页面加载完成');
+            updateDebugInfo({
+                page_loaded: true, 
+                csrf_available: !!getCSRFToken(),
+                default_interval: refreshIntervalMs
+            });
+            
+            // 延迟1秒后开始加载动态数据
+            setTimeout(() => {
+                refreshAllData();
+            }, 1000);
+            
+            // 启动1秒自动刷新
+            startAutoRefresh();
+        });
+        
+        // 页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && autoRefreshEnabled) {
+                // 页面重新可见时立即刷新
+                refreshAllData();
+            }
+            
+            updateDebugInfo({visibility_change: document.visibilityState});
+        });
+        
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', function() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>

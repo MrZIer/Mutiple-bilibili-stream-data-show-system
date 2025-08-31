@@ -1,0 +1,5 @@
+# Redis相关
+redis>=4.0.0
+
+# 日志和配置
+python-decouple>=3.6

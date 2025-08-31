@@ -1,0 +1,186 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}数据统计仪表板{% endblock %}
+
+{% block extrastyle %}
+<style>
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+.stat-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #007cba;
+}
+.stat-label {
+    color: #666;
+    margin-top: 5px;
+}
+.migration-controls {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>B站直播监控 - 数据统计仪表板</h1>
+
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_rooms }}</div>
+        <div class="stat-label">监控房间总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.active_rooms }}</div>
+        <div class="stat-label">活跃房间数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_danmaku|floatformat:0 }}</div>
+        <div class="stat-label">弹幕总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_gifts|floatformat:0 }}</div>
+        <div class="stat-label">礼物总数</div>
+    </div>
+</div>
+
+<h2>最近24小时数据</h2>
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-number">{{ recent_stats.recent_danmaku|floatformat:0 }}</div>
+        <div class="stat-label">新增弹幕</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ recent_stats.recent_gifts|floatformat:0 }}</div>
+        <div class="stat-label">新增礼物</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">¥{{ recent_stats.recent_gift_value|floatformat:2 }}</div>
+        <div class="stat-label">礼物总价值</div>
+    </div>
+</div>
+
+<div class="migration-controls">
+    <h3>数据迁移控制</h3>
+    <p>将Redis中的实时数据迁移到数据库进行持久化存储</p>
+    
+    <form id="migrationForm">
+        <div style="margin: 10px 0;">
+            <label>迁移类型：</label>
+            <select name="type" id="migrationType">
+                <option value="all">全部数据</option>
+                <option value="danmaku">仅弹幕数据</option>
+                <option value="gifts">仅礼物数据</option>
+                <option value="rooms">仅房间数据</option>
+            </select>
+        </div>
+        
+        <div style="margin: 10px 0;">
+            <label>最大年龄（小时）：</label>
+            <input type="number" name="max_age_hours" value="24" min="1" max="168">
+        </div>
+        
+        <div style="margin: 10px 0;">
+            <label>
+                <input type="checkbox" name="cleanup_redis" value="true" checked>
+                迁移后清理Redis数据
+            </label>
+        </div>
+        
+        <button type="submit" class="button" id="migrateBtn">开始迁移</button>
+        <div id="migrationResult" style="margin-top: 10px;"></div>
+    </form>
+</div>
+
+<h2>最近迁移记录</h2>
+<table>
+    <thead>
+        <tr>
+            <th>类型</th>
+            <th>状态</th>
+            <th>开始时间</th>
+            <th>总记录数</th>
+            <th>成功数</th>
+            <th>失败数</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in recent_migrations %}
+        <tr>
+            <td>{{ log.get_migration_type_display }}</td>
+            <td>{{ log.get_status_display }}</td>
+            <td>{{ log.start_time|date:"Y-m-d H:i:s" }}</td>
+            <td>{{ log.total_records }}</td>
+            <td>{{ log.success_records }}</td>
+            <td>{{ log.failed_records }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">暂无迁移记录</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+document.getElementById('migrationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('migrateBtn');
+    const result = document.getElementById('migrationResult');
+    
+    btn.disabled = true;
+    btn.textContent = '迁移中...';
+    result.innerHTML = '';
+    
+    const formData = new FormData(this);
+    
+    fetch('{% url "admin:trigger_migration" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            result.innerHTML = `<div style="color: green;">✅ ${data.message}</div>`;
+            // 显示详细结果
+            if (data.results) {
+                let details = '<ul>';
+                for (const [type, result] of Object.entries(data.results)) {
+                    details += `<li>${type}: 成功 ${result.success}, 失败 ${result.failed}</li>`;
+                }
+                details += '</ul>';
+                result.innerHTML += details;
+            }
+        } else {
+            result.innerHTML = `<div style="color: red;">❌ ${data.message}: ${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        result.innerHTML = `<div style="color: red;">❌ 请求失败: ${error}</div>`;
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = '开始迁移';
+    });
+});
+</script>
+{% endblock %}
