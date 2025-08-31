@@ -1,16 +1,45 @@
-## <a id="english"></a>🇺🇸 English Version
+# Bilibili Live Monitor System
 
-### Project Overview
+A Django and Redis-based real-time Bilibili live streaming data monitoring system that supports multi-room monitoring, real-time danmaku collection, gift statistics, and data visualization.
 
-This is a Django-based Bilibili live streaming data monitoring system that supports real-time collection of danmaku (bullet comments) and gift data, stores them in Redis cache and SQLite database, and provides a web interface for data visualization.
+## 🌟 Features
 
-### System Features
+- 🎯 **Multi-room Monitoring** - Monitor multiple live rooms simultaneously
+- 💬 **Real-time Danmaku Collection** - Real-time collection and display of bullet comments
+- 🎁 **Gift Statistics Analysis** - Statistics on gift quantity, value, and trends
+- 📊 **Data Visualization** - Django web interface for real-time data display
+- 💾 **High-performance Storage** - Redis cache ensures fast data access
+- ⚡ **Real-time Updates** - Auto-refresh and WebSocket real-time push
+- 🔄 **Auto-restart** - Automatic recovery when services fail
+- 🛠️ **Debug Tools** - Complete debugging and monitoring tools
 
-- 🚀 **Real-time Data Collection** - Live crawling of danmaku and gift data from Bilibili streams
-- 📊 **Data Visualization** - Charts and dashboards showing data trends
-- 💾 **Dual Storage** - Redis cache + SQLite database persistence
-- 🔄 **Auto Sync** - Scheduled synchronization from Redis to database
-- 🌐 **Web Interface** - Intuitive management and viewing interface
+## 📸 Live Demo Screenshots
+
+### 🏠 Main Dashboard
+> System overview interface showing real-time statistics and status of all monitored rooms
+
+![Main Dashboard](docs/images/dashboard.png)
+
+### 💬 Danmaku Browser
+> Real-time danmaku viewing and search interface with multi-room switching and live updates
+
+![Danmaku Browser](docs/images/danmaku_browser.png)
+
+### 📊 Data Statistics Charts
+> Real-time data visualization charts showing danmaku and gift data trends
+
+![Data Statistics Charts](docs/images/charts.png)
+
+### 🏠 Room Detail Page
+> Detailed information and real-time data display for individual rooms
+
+![Room Detail](docs/images/room_detail.png)
+
+### 🔧 System Debug Page
+> System status monitoring and debug information interface
+
+![Debug Page](docs/images/debug.png)
+
 
 ## 🏗️ System Architecture & Implementation Flow
 
@@ -433,239 +462,297 @@ class DashboardView(View):
         return stats
 ```
 
-### Project Structure
+## 📋 System Requirements
 
-```
-bilibili-live-monitor-django/
-├── manage.py                # Command-line utility for Django project
-├── requirements.txt         # Project dependencies list
-├── bilibili_monitor/        # Main Django application package
-│   ├── __init__.py          # Python package identifier
-│   ├── settings.py          # Django project configuration
-│   ├── urls.py              # Project URL routing configuration
-│   ├── wsgi.py              # WSGI server entry point
-│   └── asgi.py              # ASGI server entry point
-├── live_data/               # Live data processing application
-│   ├── __init__.py          # Python package identifier
-│   ├── admin.py             # Django admin backend registration
-│   ├── apps.py              # Application configuration
-│   ├── models.py            # Data model definitions
-│   ├── views.py             # View functions for request/response handling
-│   ├── urls.py              # Application URL routing configuration
-│   ├── tasks.py             # Background task processing
-│   ├── management/          # Custom management commands
-│   │   └── commands/
-│   │       ├── sync_redis_to_db.py     # Redis data sync command
-│   │       ├── start_sync_scheduler.py # Data sync scheduler
-│   │       └── check_redis_keys.py     # Redis data check command
-│   ├── migrations/          # Database migration files directory
-│   │   └── __init__.py      # Python package identifier
-│   └── templates/           # HTML template files
-│       └── live_data/
-│           ├── dashboard.html        # Dashboard template
-│           ├── danmaku_browser.html  # Danmaku browser template
-│           ├── room_list.html        # Room list template
-│           └── debug.html            # Debug page template
-├── static/                  # Static files (CSS, JS)
-│   ├── css/
-│   │   └── style.css        # Project stylesheet
-│   └── js/
-│       └── charts.js        # Chart visualization JavaScript code
-├── templates/               # Base template files
-│   └── base.html            # Base template for inheritance
-├── utils/                   # Utility function modules
-│   ├── __init__.py          # Python package identifier
-│   ├── bilibili_client.py   # Bilibili API interaction functions
-│   ├── redis_handler.py     # Redis data handling functions
-│   └── data_processor.py    # Data processing functions
-└── README.md                # Project documentation
-```
+- **Python**: 3.8 or higher
+- **Redis**: 6.0 or higher
+- **Operating System**: Windows/Linux/macOS
+- **Memory**: 4GB+ recommended
+- **Network**: Stable internet connection
 
-### Setup Instructions
+## 🚀 Quick Start
 
-#### 1. Requirements
-
-- **Python 3.7+**
-- **Redis server**
-- **Internet connection** (to access Bilibili API)
-
-#### 2. Clone the Repository
+### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
-cd bilibili-live-monitor-django
+git clone https://github.com/YOUR_USERNAME/bilibili-live-monitor.git
+cd bilibili-live-monitor
 ```
 
-#### 3. Install Dependencies
+### 2. Install Dependencies
 
 ```bash
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Or using conda
+conda install --file requirements.txt
 ```
 
-#### 4. Start Redis Service
+### 3. Start Redis Service
 
 ```bash
-# Windows (if using Redis installer)
+# Windows (using chocolatey)
+choco install redis-64
 redis-server
 
-# Or using Docker
-docker run -d -p 6379:6379 redis:latest
+# Linux (Ubuntu/Debian)
+sudo apt-get install redis-server
+sudo systemctl start redis
 
+# macOS (using homebrew)
+brew install redis
+brew services start redis
+```
+
+### 4. Configure Django
+
+```bash
+cd bilibili-live-monitor-django
+
+# Database migration
+python manage.py migrate
+
+# Create superuser (optional)
+python manage.py createsuperuser
+
+# Collect static files
+python manage.py collectstatic
+```
+
+### 5. Start System
+
+#### Method 1: One-click Startup (Recommended)
+
+```bash
+# Return to project root directory
+cd ..
+
+# One-click start all services
+python setup.py
+```
+
+Startup effect as shown:
+
+![Startup Process](docs/images/startup_process.png)
+
+#### Method 2: Start Separately
+
+```bash
+# Terminal 1: Start data collector
+cd web_version
+python multi_room_collector.py
+
+# Terminal 2: Start Django server
+cd bilibili-live-monitor-django
+python manage.py runserver 0.0.0.0:8000
+```
+
+### 6. Access System
+
+Open browser and visit the following addresses:
+
+- 🏠 **Homepage**: http://localhost:8000/live/
+- 📊 **Data Dashboard**: http://localhost:8000/live/dashboard/
+- 💬 **Danmaku Browser**: http://localhost:8000/live/danmaku/
+- 🔧 **Debug Page**: http://localhost:8000/live/debug/
+
+## 📁 Project Structure
+
+```
+bilibili-live-monitor/
+├── bilibili-live-monitor-django/     # Django Web Application
+│   ├── bilibili_monitor/             # Django project configuration
+│   ├── live_data/                    # Main application module
+│   │   ├── templates/                # HTML templates
+│   │   ├── static/                   # Static files
+│   │   ├── management/               # Django management commands
+│   │   └── ...
+│   ├── utils/                        # Utility libraries
+│   ├── static/                       # Global static files
+│   ├── logs/                         # Log files
+│   └── manage.py                     # Django management script
+├── web_version/                      # Data collector
+│   ├── multi_room_collector.py       # Multi-room collector
+│   ├── simple_redis_saver.py         # Redis data saver
+│   └── ...
+├── docs/                             # Documentation and images
+│   └── images/                       # Interface screenshots
+├── live_data/                        # Historical data and tools
+├── spider_live_data/                 # Data analysis tools
+├── setup.py                         # One-click startup script
+├── requirements.txt                  # Python dependencies
+└── README.md                         # Project documentation
+```
+
+## ⚙️ Configuration
+
+### Monitor Room Configuration
+
+Edit the room ID list in `web_version/multi_room_collector.py`:
+
+```python
+# Default monitored room IDs
+DEFAULT_ROOMS = [
+    1962481108,  # Room 1
+    1982728080,  # Room 2
+    1959064353,  # Room 3
+    # Add more room IDs...
+]
+```
+
+### Redis Configuration
+
+Edit `utils/redis_config.py`:
+
+```python
+REDIS_CONFIG = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 0,
+    'decode_responses': True,
+    'max_connections': 50
+}
+```
+
+### Django Configuration
+
+Edit `bilibili_monitor/settings.py`:
+
+```python
+# Database configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Redis configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/0',
+    }
+}
+```
+
+## 🔧 Advanced Usage
+
+### Custom Monitor Rooms
+
+```bash
+# Monitor specific rooms
+python setup.py --rooms 1962481108,1982728080,1959064353
+
+# Use configuration file
+python setup.py --config custom_config.json
+```
+
+### Start Specific Services Only
+
+```bash
+# Django only
+python setup.py --django-only
+
+# Data collector only
+python setup.py --collector-only
+```
+
+### Using API
+
+The system provides RESTful API interfaces:
+
+```bash
+# Get room danmaku data
+curl http://localhost:8000/live/api/room/1962481108/danmaku/
+
+# Get room gift data
+curl http://localhost:8000/live/api/room/1962481108/gifts/
+
+# Get room statistics
+curl http://localhost:8000/live/api/room/1962481108/stats/
+```
+
+### Debug Mode
+
+```bash
+# Enable detailed debug information
+python setup.py --no-background --status-display
+
+# View Redis data
+python manage.py shell
+>>> from utils.redis_handler import get_redis_client
+>>> client = get_redis_client()
+>>> client.keys('room:*')
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Q: Collector process stops frequently**
+```bash
 # Check Redis connection
 redis-cli ping
-# Should return PONG
+
+# View error logs
+tail -f logs/collector.log
+
+# Use debug mode
+python setup.py --no-background
 ```
 
-#### 5. Run Database Migrations
-
+**Q: Encoding errors (UnicodeEncodeError)**
 ```bash
-python manage.py migrate
+# Set environment variable for Windows
+set PYTHONIOENCODING=utf-8
+
+# Or set in code
+os.environ['PYTHONIOENCODING'] = 'utf-8'
 ```
 
-#### 6. Start Development Server
-
+**Q: Django cannot be accessed**
 ```bash
-python manage.py runserver
+# Check if port is occupied
+netstat -an | grep 8000
+
+# Use different port
+python manage.py runserver 0.0.0.0:8080
 ```
 
-#### 7. Access the Application
-
-Open your browser and navigate to `http://127.0.0.1:8000/live/`
-
-### Usage Tutorial
-
-#### 🚀 Quick Start
-
-1. **Configure Monitoring Rooms**
-   
-   Edit the `../web_version/multi_room_collector.py` file, find lines 787-793:
-   ```python
-   # Method 2: Multiple room list
-   room_ids = [
-       1962481108,  # Room 1 you want to monitor
-       22889484,    # Room 2 you want to monitor
-       7758258,     # Room 3 you want to monitor
-       # You can continue adding more rooms...
-   ]
-   ```
-
-2. **Start the Complete System**
-   
-   Go back to the parent directory and run the one-click startup script:
-   ```bash
-   cd ..
-   python setup.py
-   ```
-
-3. **View Real-time Data**
-   
-   Open your browser and visit: `http://localhost:8000/live/`
-
-#### 📊 Main Feature Pages
-
-| Page | URL | Description |
-|------|-----|-------------|
-| **Main Dashboard** | `/live/` | System overview and real-time statistics |
-| **Danmaku Browser** | `/live/danmaku/` | Real-time viewing and searching of danmaku data |
-| **Gift Statistics** | `/live/gifts/` | View gift data and statistics |
-| **Room Management** | `/live/rooms/` | Manage monitored live rooms |
-| **Debug Page** | `/live/debug/` | System status check and debug information |
-
-#### ⚙️ Management Commands
-
+**Q: Redis connection failed**
 ```bash
-# Check Redis data
-python manage.py check_redis_keys --pattern "room:*" --limit 10
+# Check Redis service status
+redis-cli ping
 
-# Manually sync data to database
-python manage.py sync_redis_to_db --data-type all
+# Start Redis on Windows
+redis-server
 
-# Start data sync scheduler
-python manage.py start_sync_scheduler --interval 300
-
-# Clean up expired data (optional)
-python manage.py cleanup_old_data --days 7
+# Start Redis on Linux
+sudo systemctl start redis
 ```
 
-#### 🔄 Data Sync Workflow
+### Log Files
 
-1. **Real-time Collection**: Data collector fetches live data from Bilibili API
-2. **Cache Storage**: Data is immediately stored in Redis cache
-3. **Scheduled Sync**: Redis data is synced to SQLite database every 5 minutes
-4. **Web Display**: View real-time and historical data through Django interface
+- **Django logs**: `logs/django.log`
+- **Collector logs**: `logs/collector.log`
+- **Startup logs**: `startup.log`
 
-#### 🎯 Room Selection Recommendations
+## 🤝 Contributing
 
-**Recommended Configuration (Moderate popularity, reasonable data volume):**
-```python
-room_ids = [
-    1962481108,  # Test room
-    22889484,    # Medium popularity room
-    7758258,     # Active but not overloaded room
-]
-```
+Welcome to submit issues and pull requests!
 
-**Avoid Configuration (Excessive data volume):**
-```python
-# Not recommended - These rooms have massive data volume
-room_ids = [
-    6,        # Official live room - 1000+ danmaku per minute
-    17961,    # Extremely popular room - Massive data volume
-    1,        # Official room - High load
-]
-```
+1. Fork the project
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
-#### 🔧 Performance Optimization Tips
+## 📄 License
 
-- **Choose Rooms Wisely**: Avoid monitoring extremely popular rooms
-- **Adjust Sync Frequency**: Modify sync intervals based on data volume
-- **Regular Data Cleanup**: Delete expired danmaku and gift data
-- **Monitor Resource Usage**: Keep an eye on memory and disk space usage
-
-### Troubleshooting
-
-#### Common Issues
-
-1. **Redis Connection Failed**
-   ```bash
-   # Check Redis service status
-   redis-cli ping
-   
-   # If failed, start Redis service
-   redis-server
-   ```
-
-2. **Django Startup Failed**
-   ```bash
-   # Check database migrations
-   python manage.py migrate
-   
-   # Check port usage
-   netstat -an | findstr 8000
-   ```
-
-3. **Data Collection Errors**
-   - Verify room IDs are correct
-   - Check network connection
-   - Review collector logs
-
-4. **Encoding Errors**
-   ```bash
-   # Set UTF-8 encoding for Windows systems
-   set PYTHONIOENCODING=utf-8
-   python setup.py
-   ```
-
-### Contributing
-
-Feel free to submit issues and pull requests to improve functionality and fix bugs.
+This project is open source under the MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-## License
-
-This project is open source. Please refer to the LICENSE file for details.
-
-## Contact
-
-For questions or support, please create an issue in the repository.
+⭐ If this project helps you, please give it a Star!

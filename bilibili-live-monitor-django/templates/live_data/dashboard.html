@@ -467,16 +467,6 @@
                     {% if active_rooms %}
                         {% for room in active_rooms %}
                         <div class="room-item {% if room.live_status == 1 %}live{% elif room.live_status == 2 %}round{% else %}offline{% endif %}" data-room-id="{{ room.room_id }}">
-                            <!-- 直播状态标识 -->
-                            <div class="room-status">
-                                {% if room.live_status == 0 %}
-                                    <span class="status-live">🔴 直播中</span>
-                                {% elif room.live_status == 1 %}
-                                    <span class="status-round">🔄 轮播</span>
-                                {% else %}
-                                    <span class="status-offline">⚫ 离线</span>
-                                {% endif %}
-                            </div>
                             
                             <!-- 房间头部信息 -->
                             <div class="room-header">
@@ -592,10 +582,6 @@
                         </select>
                     </label>
                     
-                    <label style="display: block;">
-                        <input type="checkbox" id="show-offline-rooms" checked onchange="toggleOfflineRooms()">
-                        显示离线房间
-                    </label>
                 </div>
                 
                 <h4>📈 实时统计</h4>
@@ -908,16 +894,7 @@
                                 setTimeout(() => animateRoomUpdate(room.room_id), 100);
                             }
                             
-                            // 确定房间状态样式
-                            let statusClass = 'offline';
-                            let statusText = '⚫ 离线';
-                            if (room.live_status == 1) {
-                                statusClass = 'live';
-                                statusText = '🔴 直播中';
-                            } else if (room.live_status == 2) {
-                                statusClass = 'round';
-                                statusText = '🔄 轮播';
-                            }
+                            
                             
                             return `
                                 <div class="room-item ${statusClass}" data-room-id="${room.room_id}">
