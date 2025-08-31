@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, admin_views
 
 app_name = 'live_data'
 
@@ -29,4 +29,8 @@ urlpatterns = [
     
     # 数据维护API
     path('api/maintenance/cleanup/', views.api_maintenance_cleanup, name='api_maintenance_cleanup'),
+    
+    # 管理后台相关URL
+    path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin/trigger-migration/', admin_views.trigger_migration, name='admin_trigger_migration'),
 ]

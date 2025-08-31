@@ -19,19 +19,29 @@ logger = logging.getLogger(__name__)
 def get_redis_client():
     """获取Redis客户端"""
     try:
+        # 尝试从Django设置获取Redis配置
         redis_config = getattr(settings, 'REDIS_CONFIG', {
             'host': 'localhost',
             'port': 6379,
             'db': 0,
-            'decode_responses': True
+            'decode_responses': True,
+            'socket_connect_timeout': 5,
+            'socket_timeout': 5,
+            'retry_on_timeout': True
         })
         
         client = redis.Redis(**redis_config)
-        client.ping()  # 测试连接
+        
+        # 测试连接
+        client.ping()
+        
         return client
         
-    except Exception as e:
+    except redis.ConnectionError as e:
         logger.error(f"Redis连接失败: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"创建Redis客户端失败: {e}")
         raise
 
 def init_live_cache():

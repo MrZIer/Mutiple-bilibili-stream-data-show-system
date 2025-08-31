@@ -60,6 +60,43 @@ def start_collector():
         print(f"❌ 启动数据收集器失败: {e}")
         return None
 
+def start_sync_scheduler():
+    """启动数据同步调度器"""
+    try:
+        print("⏰ 启动数据同步调度器...")
+        
+        # 获取当前脚本的目录
+        current_dir = Path(__file__).parent
+        manage_py = current_dir / "bilibili-live-monitor-django" / "manage.py"
+        
+        if not manage_py.exists():
+            print(f"❌ manage.py文件不存在: {manage_py}")
+            return None
+        
+        # 设置环境变量
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        env['PYTHONLEGACYWINDOWSSTDIO'] = '1'
+        
+        # 启动同步调度器
+        sync_process = subprocess.Popen(
+            [sys.executable, str(manage_py), "start_sync_scheduler", "--interval", "300"],
+            cwd=manage_py.parent,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding='utf-8',
+            errors='replace',
+            env=env
+        )
+        
+        print("✅ 数据同步调度器已启动 (每5分钟同步一次)")
+        return sync_process
+        
+    except Exception as e:
+        print(f"❌ 启动数据同步调度器失败: {e}")
+        return None
+
 def start_django():
     """启动Django服务器"""
     try:
@@ -168,6 +205,23 @@ def main():
         # 等待一会让收集器完全启动
         time.sleep(3)
         
+        # 启动数据同步调度器
+        sync_process = start_sync_scheduler()
+        if sync_process:
+            processes['sync'] = sync_process
+            
+            # 启动监控线程
+            sync_thread = threading.Thread(
+                target=monitor_process, 
+                args=(sync_process, "同步器"),
+                daemon=True
+            )
+            sync_thread.start()
+            monitor_threads.append(sync_thread)
+        
+        # 等待一会让同步器启动
+        time.sleep(2)
+        
         # 启动Django服务器
         django_process = start_django()
         if django_process:
@@ -188,6 +242,8 @@ def main():
         
         safe_print("\n" + "="*60)
         safe_print("✅ 所有服务已启动！")
+        safe_print("🎯 数据收集器: 收集B站直播数据到Redis")
+        safe_print("⏰ 数据同步器: 每5分钟将Redis数据同步到SQLite")
         safe_print("🌐 Web界面: http://localhost:8000/live/")
         safe_print("💡 按 Ctrl+C 停止所有服务")
         safe_print("="*60)

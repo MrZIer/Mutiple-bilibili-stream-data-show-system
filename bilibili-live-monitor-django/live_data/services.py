@@ -3,226 +3,556 @@ import threading
 import time
 import logging
 import random
+import json
 from datetime import datetime, timedelta
-from typing import List, Dict
+from django.utils import timezone
+from django.db import transaction, DatabaseError
 from django.conf import settings
+from typing import List, Dict, Any, Tuple
 
-from utils.bilibili_client import get_bilibili_client, get_async_bilibili_client, LiveDanmakuCollector
-from utils.redis_handler import get_room_manager
-from .models import Room
+from .collectors import get_data_collector, LiveDataCollector
+# 导入模型
+from .models import LiveRoom, DanmakuData, GiftData, DataMigrationLog
 
-logger = logging.getLogger('live_data')
+# 导入Redis处理器
+try:
+    from utils.redis_handler import get_redis_client
+except ImportError:
+    # 如果utils.redis_handler不存在，创建一个简单的Redis客户端
+    import redis
+    def get_redis_client():
+        return redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
-class LiveDataCollector:
-    """直播数据收集器"""
+logger = logging.getLogger(__name__)
+
+class DataMigrationService:
+    """数据迁移服务"""
     
     def __init__(self):
-        self.bilibili_client = get_bilibili_client()
-        self.async_client = get_async_bilibili_client()
-        self.room_manager = get_room_manager()
-        self.is_running = False
-        self.collection_threads = {}
-        self.danmaku_collectors = {}  # 弹幕收集器
-        self.collection_interval = settings.LIVE_MONITOR_CONFIG.get('COLLECTION_INTERVAL', 30)
-        
-    def start_monitoring_room(self, room_id: int):
-        """开始监控单个房间"""
-        if room_id in self.collection_threads:
-            logger.warning(f"房间 {room_id} 已在监控中")
-            return
-        
-        # 启动监控线程
-        thread = threading.Thread(
-            target=self._monitor_room_loop,
-            args=(room_id,),
-            daemon=True,
-            name=f"Monitor-Room-{room_id}"
-        )
-        thread.start()
-        self.collection_threads[room_id] = thread
-        
-        # 启动弹幕监听
-        self._start_danmaku_monitoring(room_id)
-        
-        # 更新数据库状态
         try:
-            room, created = Room.objects.get_or_create(room_id=room_id)
-            room.is_monitoring = True
-            room.save()
-            logger.info(f"开始监控房间 {room_id}")
+            self.redis_client = get_redis_client()
         except Exception as e:
-            logger.error(f"更新房间 {room_id} 监控状态失败: {e}")
-    
-    def _start_danmaku_monitoring(self, room_id: int):
-        """启动弹幕监听"""
-        try:
-            # 创建弹幕收集器
-            danmaku_collector = LiveDanmakuCollector(
-                room_id=room_id,
-                redis_cache=self.room_manager.cache
-            )
-            
-            self.danmaku_collectors[room_id] = danmaku_collector
-            
-            # 在新的事件循环中启动弹幕监听
-            def run_danmaku_loop():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    loop.run_until_complete(danmaku_collector.start())
-                    # 保持连接
-                    while room_id in self.danmaku_collectors and self.is_running:
-                        time.sleep(1)
-                except Exception as e:
-                    logger.error(f"房间 {room_id} 弹幕监听异常: {e}")
-                finally:
-                    loop.close()
-            
-            danmaku_thread = threading.Thread(
-                target=run_danmaku_loop,
-                daemon=True,
-                name=f"Danmaku-{room_id}"
-            )
-            danmaku_thread.start()
-            
-            logger.info(f"房间 {room_id} 弹幕监听已启动")
-            
-        except Exception as e:
-            logger.error(f"启动房间 {room_id} 弹幕监听失败: {e}")
-    
-    def stop_monitoring_room(self, room_id: int):
-        """停止监控单个房间"""
-        if room_id in self.collection_threads:
-            # 线程会在下次循环时自动退出
-            del self.collection_threads[room_id]
+            logger.error(f"Redis连接失败: {e}")
+            self.redis_client = None
         
-        # 停止弹幕监听
-        if room_id in self.danmaku_collectors:
-            try:
-                # 异步停止弹幕收集器
-                asyncio.run(self.danmaku_collectors[room_id].stop())
-                del self.danmaku_collectors[room_id]
-                logger.info(f"房间 {room_id} 弹幕监听已停止")
-            except Exception as e:
-                logger.error(f"停止房间 {room_id} 弹幕监听失败: {e}")
+        self.batch_size = getattr(settings, 'MIGRATION_BATCH_SIZE', 1000)
+        self.max_retries = getattr(settings, 'MIGRATION_MAX_RETRIES', 3)
+    
+    def migrate_all_data(self, cleanup_redis=True, max_age_hours=24):
+        """
+        迁移所有数据到数据库
         
-        # 更新数据库状态
-        try:
-            room = Room.objects.get(room_id=room_id)
-            room.is_monitoring = False
-            room.save()
-            logger.info(f"停止监控房间 {room_id}")
-        except Room.DoesNotExist:
-            logger.warning(f"房间 {room_id} 不存在于数据库中")
-    
-    def start_monitoring_multiple_rooms(self, room_ids: List[int]):
-        """开始监控多个房间"""
-        self.is_running = True
-        for room_id in room_ids:
-            self.start_monitoring_room(room_id)
-    
-    def stop_all_monitoring(self):
-        """停止所有监控"""
-        self.is_running = False
-        room_ids = list(self.collection_threads.keys())
-        for room_id in room_ids:
-            self.stop_monitoring_room(room_id)
+        Args:
+            cleanup_redis: 是否清理Redis中已迁移的数据
+            max_age_hours: 只迁移指定小时内的数据
+        """
+        logger.info("开始执行数据迁移任务")
         
-        logger.info("已停止所有房间监控")
-    
-    def _monitor_room_loop(self, room_id: int):
-        """单个房间监控循环"""
-        logger.info(f"房间 {room_id} 监控线程启动")
+        if not self.redis_client:
+            logger.error("Redis客户端未初始化")
+            return {
+                'danmaku': {'success': 0, 'failed': 0, 'errors': ['Redis连接失败']},
+                'gifts': {'success': 0, 'failed': 0, 'errors': ['Redis连接失败']},
+                'rooms': {'success': 0, 'failed': 0, 'errors': ['Redis连接失败']}
+            }
         
-        while room_id in self.collection_threads and self.is_running:
-            try:
-                # 收集数据
-                self._collect_room_data(room_id)
-                
-                # 等待下次收集
-                time.sleep(self.collection_interval)
-                
-            except Exception as e:
-                logger.error(f"房间 {room_id} 数据收集出错: {e}")
-                time.sleep(10)  # 出错后等待10秒再重试
-        
-        logger.info(f"房间 {room_id} 监控线程结束")
-    
-    def _collect_room_data(self, room_id: int):
-        """收集单个房间数据"""
-        try:
-            # 使用Bilibili API获取数据
-            room_data = self.bilibili_client.fetch_live_data(room_id)
-            
-            if not room_data:
-                logger.warning(f"房间 {room_id} 未获取到数据")
-                return
-            
-            # 保存房间基本信息到Redis
-            self.room_manager.cache.save_room_info(room_id, room_data)
-            
-            # 保存实时数据到Redis
-            self.room_manager.cache.save_real_time_data(
-                room_id, 'popularity', room_data['popularity']
-            )
-            
-            if room_data.get('watched'):
-                self.room_manager.cache.save_real_time_data(
-                    room_id, 'watched', room_data['watched']
-                )
-            
-            # 更新数据库中的房间信息
-            self._update_room_in_database(room_id, room_data)
-            
-            logger.debug(f"房间 {room_id} 数据收集完成 - 人气: {room_data['popularity']}")
-            
-        except Exception as e:
-            logger.error(f"收集房间 {room_id} 数据失败: {e}")
-    
-    def _update_room_in_database(self, room_id: int, room_data: Dict):
-        """更新数据库中的房间信息"""
-        try:
-            room, created = Room.objects.get_or_create(
-                room_id=room_id,
-                defaults={
-                    'real_room_id': room_data.get('real_room_id', room_id),
-                    'uname': room_data.get('uname', f'主播{room_id}'),
-                    'title': room_data.get('title', f'直播间{room_id}'),
-                    'area_name': room_data.get('area_name', ''),
-                    'parent_area_name': room_data.get('parent_area_name', ''),
-                    'uid': room_data.get('uid', 0),
-                    'cover': room_data.get('cover', ''),
-                    'keyframe': room_data.get('keyframe', ''),
-                    'live_status': room_data.get('live_status', 0),
-                    'is_monitoring': True
-                }
-            )
-            
-            if not created:
-                # 更新现有房间信息
-                room.real_room_id = room_data.get('real_room_id', room.real_room_id)
-                room.uname = room_data.get('uname', room.uname)
-                room.title = room_data.get('title', room.title)
-                room.area_name = room_data.get('area_name', room.area_name)
-                room.parent_area_name = room_data.get('parent_area_name', room.parent_area_name)
-                room.uid = room_data.get('uid', room.uid)
-                room.cover = room_data.get('cover', room.cover)
-                room.keyframe = room_data.get('keyframe', room.keyframe)
-                room.live_status = room_data.get('live_status', room.live_status)
-                room.save()
-                
-        except Exception as e:
-            logger.error(f"更新房间 {room_id} 数据库信息失败: {e}")
-
-    def get_collector_status(self) -> Dict:
-        """获取收集器状态"""
-        return {
-            'is_running': self.is_running,
-            'monitoring_rooms': list(self.collection_threads.keys()),
-            'danmaku_rooms': list(self.danmaku_collectors.keys()),
-            'active_threads': len(self.collection_threads),
-            'collection_interval': self.collection_interval
+        results = {
+            'danmaku': {'success': 0, 'failed': 0, 'errors': []},
+            'gifts': {'success': 0, 'failed': 0, 'errors': []},
+            'rooms': {'success': 0, 'failed': 0, 'errors': []}
         }
+        
+        try:
+            # 1. 迁移房间信息
+            room_result = self.migrate_room_data(cleanup_redis, max_age_hours)
+            results['rooms'] = room_result
+            
+            # 2. 迁移弹幕数据
+            danmaku_result = self.migrate_danmaku_data(cleanup_redis, max_age_hours)
+            results['danmaku'] = danmaku_result
+            
+            # 3. 迁移礼物数据
+            gift_result = self.migrate_gift_data(cleanup_redis, max_age_hours)
+            results['gifts'] = gift_result
+            
+            # 4. 清理过期的Redis键（可选）
+            if cleanup_redis:
+                self.cleanup_expired_redis_data(max_age_hours)
+            
+            logger.info(f"数据迁移完成: {results}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"数据迁移过程中发生错误: {e}", exc_info=True)
+            return results
+    
+    def migrate_room_data(self, cleanup_redis=True, max_age_hours=24):
+        """迁移房间数据"""
+        log_entry = DataMigrationLog.objects.create(
+            migration_type='room',
+            start_time=timezone.now()
+        )
+        
+        try:
+            # 获取所有房间键
+            room_keys = self.redis_client.keys('room:*:info')
+            total_records = len(room_keys)
+            log_entry.total_records = total_records
+            log_entry.save()
+            
+            success_count = 0
+            failed_count = 0
+            errors = []
+            
+            logger.info(f"开始迁移房间数据，共 {total_records} 个房间")
+            
+            for room_key in room_keys:
+                try:
+                    # 提取房间ID
+                    room_id = int(room_key.split(':')[1])
+                    
+                    # 获取房间信息
+                    room_data = self.redis_client.hgetall(room_key)
+                    if not room_data:
+                        continue
+                    
+                    # 检查或创建房间记录
+                    room, created = LiveRoom.objects.get_or_create(
+                        room_id=room_id,
+                        defaults={
+                            'title': room_data.get('title', ''),
+                            'uname': room_data.get('uname', ''),
+                            'face': room_data.get('face', ''),
+                            'online': int(room_data.get('online', 0)),
+                            'status': int(room_data.get('status', 0))
+                        }
+                    )
+                    
+                    # 如果不是新创建的，更新信息
+                    if not created:
+                        room.title = room_data.get('title', room.title)
+                        room.uname = room_data.get('uname', room.uname)
+                        room.face = room_data.get('face', room.face)
+                        room.online = int(room_data.get('online', room.online))
+                        room.status = int(room_data.get('status', room.status))
+                        room.save()
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    failed_count += 1
+                    error_msg = f"房间 {room_key} 迁移失败: {e}"
+                    errors.append(error_msg)
+                    logger.error(error_msg)
+            
+            # 更新日志
+            log_entry.end_time = timezone.now()
+            log_entry.success_records = success_count
+            log_entry.failed_records = failed_count
+            log_entry.status = 'completed' if failed_count == 0 else 'partial'
+            if errors:
+                log_entry.error_message = '\n'.join(errors[:10])
+            log_entry.save()
+            
+            logger.info(f"房间数据迁移完成: 成功 {success_count}, 失败 {failed_count}")
+            
+            return {
+                'success': success_count,
+                'failed': failed_count,
+                'errors': errors
+            }
+            
+        except Exception as e:
+            log_entry.status = 'failed'
+            log_entry.error_message = str(e)
+            log_entry.end_time = timezone.now()
+            log_entry.save()
+            raise
+    
+    def migrate_danmaku_data(self, cleanup_redis=True, max_age_hours=24):
+        """迁移弹幕数据"""
+        log_entry = DataMigrationLog.objects.create(
+            migration_type='danmaku',
+            start_time=timezone.now()
+        )
+        
+        try:
+            # 获取所有弹幕列表键
+            danmaku_keys = self.redis_client.keys('room:*:danmaku')
+            total_keys = len(danmaku_keys)
+            
+            success_count = 0
+            failed_count = 0
+            errors = []
+            
+            logger.info(f"开始迁移弹幕数据，共 {total_keys} 个房间")
+            
+            # 计算时间阈值
+            time_threshold = timezone.now() - timedelta(hours=max_age_hours)
+            
+            for danmaku_key in danmaku_keys:
+                try:
+                    # 提取房间ID
+                    room_id = int(danmaku_key.split(':')[1])
+                    
+                    # 获取房间对象
+                    try:
+                        room = LiveRoom.objects.get(room_id=room_id)
+                    except LiveRoom.DoesNotExist:
+                        room = LiveRoom.objects.create(
+                            room_id=room_id,
+                            title=f"房间 {room_id}",
+                            uname="未知主播"
+                        )
+                    
+                    # 分批处理弹幕数据
+                    batch_success, batch_failed, batch_errors = self._migrate_danmaku_batch(
+                        danmaku_key, room, time_threshold, cleanup_redis
+                    )
+                    
+                    success_count += batch_success
+                    failed_count += batch_failed
+                    errors.extend(batch_errors)
+                    
+                except Exception as e:
+                    error_msg = f"处理房间 {danmaku_key} 弹幕时出错: {e}"
+                    errors.append(error_msg)
+                    logger.error(error_msg)
+            
+            # 更新日志
+            log_entry.end_time = timezone.now()
+            log_entry.total_records = success_count + failed_count
+            log_entry.success_records = success_count
+            log_entry.failed_records = failed_count
+            log_entry.status = 'completed' if failed_count == 0 else 'partial'
+            if errors:
+                log_entry.error_message = '\n'.join(errors[:20])
+            log_entry.save()
+            
+            logger.info(f"弹幕数据迁移完成: 成功 {success_count}, 失败 {failed_count}")
+            
+            return {
+                'success': success_count,
+                'failed': failed_count,
+                'errors': errors
+            }
+            
+        except Exception as e:
+            log_entry.status = 'failed'
+            log_entry.error_message = str(e)
+            log_entry.end_time = timezone.now()
+            log_entry.save()
+            raise
+    
+    def _migrate_danmaku_batch(self, danmaku_key: str, room: LiveRoom, 
+                              time_threshold: datetime, cleanup_redis: bool) -> Tuple[int, int, List[str]]:
+        """分批迁移弹幕数据"""
+        success_count = 0
+        failed_count = 0
+        errors = []
+        
+        try:
+            # 获取列表长度
+            list_length = self.redis_client.llen(danmaku_key)
+            if list_length == 0:
+                return success_count, failed_count, errors
+            
+            # 分批处理
+            for start in range(0, list_length, self.batch_size):
+                end = min(start + self.batch_size - 1, list_length - 1)
+                
+                try:
+                    # 获取一批弹幕数据
+                    danmaku_batch = self.redis_client.lrange(danmaku_key, start, end)
+                    
+                    danmaku_objects = []
+                    
+                    for danmaku_json in danmaku_batch:
+                        try:
+                            danmaku_data = json.loads(danmaku_json)
+                            
+                            # 解析时间戳
+                            timestamp = datetime.fromtimestamp(
+                                danmaku_data.get('timestamp', 0),
+                                tz=timezone.get_current_timezone()
+                            )
+                            
+                            # 检查时间阈值
+                            if timestamp < time_threshold:
+                                continue
+                            
+                            # 创建弹幕对象
+                            danmaku_obj = DanmakuData(
+                                room=room,
+                                uid=danmaku_data.get('uid', 0),
+                                username=danmaku_data.get('username', ''),
+                                message=danmaku_data.get('message', ''),
+                                timestamp=timestamp,
+                                medal_name=danmaku_data.get('medal_name', ''),
+                                medal_level=danmaku_data.get('medal_level', 0),
+                                user_level=danmaku_data.get('user_level', 0),
+                                is_admin=danmaku_data.get('is_admin', False),
+                                is_vip=danmaku_data.get('is_vip', False)
+                            )
+                            
+                            danmaku_objects.append(danmaku_obj)
+                            
+                        except Exception as e:
+                            failed_count += 1
+                            errors.append(f"解析弹幕数据失败: {e}")
+                    
+                    # 批量插入数据库
+                    if danmaku_objects:
+                        try:
+                            with transaction.atomic():
+                                DanmakuData.objects.bulk_create(
+                                    danmaku_objects,
+                                    ignore_conflicts=True
+                                )
+                            
+                            success_count += len(danmaku_objects)
+                            
+                        except DatabaseError as e:
+                            failed_count += len(danmaku_objects)
+                            errors.append(f"批量插入弹幕数据失败: {e}")
+                    
+                except Exception as e:
+                    errors.append(f"处理弹幕批次 {start}-{end} 失败: {e}")
+            
+            # 清理Redis数据
+            if cleanup_redis and failed_count == 0:
+                try:
+                    current_length = self.redis_client.llen(danmaku_key)
+                    if current_length > 1000:  # 保留最新的1000条
+                        self.redis_client.ltrim(danmaku_key, 0, 999)
+                except Exception as e:
+                    errors.append(f"清理Redis弹幕数据失败: {e}")
+        
+        except Exception as e:
+            errors.append(f"迁移弹幕数据失败: {e}")
+        
+        return success_count, failed_count, errors
+    
+    def migrate_gift_data(self, cleanup_redis=True, max_age_hours=24):
+        """迁移礼物数据"""
+        log_entry = DataMigrationLog.objects.create(
+            migration_type='gift',
+            start_time=timezone.now()
+        )
+        
+        try:
+            # 获取所有礼物列表键
+            gift_keys = self.redis_client.keys('room:*:gifts')
+            total_keys = len(gift_keys)
+            
+            success_count = 0
+            failed_count = 0
+            errors = []
+            
+            logger.info(f"开始迁移礼物数据，共 {total_keys} 个房间")
+            
+            # 计算时间阈值
+            time_threshold = timezone.now() - timedelta(hours=max_age_hours)
+            
+            for gift_key in gift_keys:
+                try:
+                    # 提取房间ID
+                    room_id = int(gift_key.split(':')[1])
+                    
+                    # 获取房间对象
+                    try:
+                        room = LiveRoom.objects.get(room_id=room_id)
+                    except LiveRoom.DoesNotExist:
+                        room = LiveRoom.objects.create(
+                            room_id=room_id,
+                            title=f"房间 {room_id}",
+                            uname="未知主播"
+                        )
+                    
+                    # 分批处理礼物数据
+                    batch_success, batch_failed, batch_errors = self._migrate_gift_batch(
+                        gift_key, room, time_threshold, cleanup_redis
+                    )
+                    
+                    success_count += batch_success
+                    failed_count += batch_failed
+                    errors.extend(batch_errors)
+                    
+                except Exception as e:
+                    error_msg = f"处理房间 {gift_key} 礼物时出错: {e}"
+                    errors.append(error_msg)
+                    logger.error(error_msg)
+            
+            # 更新日志
+            log_entry.end_time = timezone.now()
+            log_entry.total_records = success_count + failed_count
+            log_entry.success_records = success_count
+            log_entry.failed_records = failed_count
+            log_entry.status = 'completed' if failed_count == 0 else 'partial'
+            if errors:
+                log_entry.error_message = '\n'.join(errors[:20])
+            log_entry.save()
+            
+            logger.info(f"礼物数据迁移完成: 成功 {success_count}, 失败 {failed_count}")
+            
+            return {
+                'success': success_count,
+                'failed': failed_count,
+                'errors': errors
+            }
+            
+        except Exception as e:
+            log_entry.status = 'failed'
+            log_entry.error_message = str(e)
+            log_entry.end_time = timezone.now()
+            log_entry.save()
+            raise
+    
+    def _migrate_gift_batch(self, gift_key: str, room: LiveRoom, 
+                           time_threshold: datetime, cleanup_redis: bool) -> Tuple[int, int, List[str]]:
+        """分批迁移礼物数据"""
+        success_count = 0
+        failed_count = 0
+        errors = []
+        
+        try:
+            # 获取列表长度
+            list_length = self.redis_client.llen(gift_key)
+            if list_length == 0:
+                return success_count, failed_count, errors
+            
+            # 分批处理
+            for start in range(0, list_length, self.batch_size):
+                end = min(start + self.batch_size - 1, list_length - 1)
+                
+                try:
+                    # 获取一批礼物数据
+                    gift_batch = self.redis_client.lrange(gift_key, start, end)
+                    
+                    gift_objects = []
+                    
+                    for gift_json in gift_batch:
+                        try:
+                            gift_data = json.loads(gift_json)
+                            
+                            # 解析时间戳
+                            timestamp = datetime.fromtimestamp(
+                                gift_data.get('timestamp', 0),
+                                tz=timezone.get_current_timezone()
+                            )
+                            
+                            # 检查时间阈值
+                            if timestamp < time_threshold:
+                                continue
+                            
+                            # 创建礼物对象
+                            gift_obj = GiftData(
+                                room=room,
+                                uid=gift_data.get('uid', 0),
+                                username=gift_data.get('username', ''),
+                                gift_name=gift_data.get('gift_name', ''),
+                                gift_id=gift_data.get('gift_id', 0),
+                                num=gift_data.get('num', 1),
+                                price=gift_data.get('price', 0),
+                                total_price=gift_data.get('total_price', 0),
+                                timestamp=timestamp,
+                                medal_name=gift_data.get('medal_name', ''),
+                                medal_level=gift_data.get('medal_level', 0)
+                            )
+                            
+                            gift_objects.append(gift_obj)
+                            
+                        except Exception as e:
+                            failed_count += 1
+                            errors.append(f"解析礼物数据失败: {e}")
+                    
+                    # 批量插入数据库
+                    if gift_objects:
+                        try:
+                            with transaction.atomic():
+                                GiftData.objects.bulk_create(
+                                    gift_objects,
+                                    ignore_conflicts=True
+                                )
+                            
+                            success_count += len(gift_objects)
+                            
+                        except DatabaseError as e:
+                            failed_count += len(gift_objects)
+                            errors.append(f"批量插入礼物数据失败: {e}")
+                    
+                except Exception as e:
+                    errors.append(f"处理礼物批次 {start}-{end} 失败: {e}")
+            
+            # 清理Redis数据
+            if cleanup_redis and failed_count == 0:
+                try:
+                    current_length = self.redis_client.llen(gift_key)
+                    if current_length > 500:  # 保留最新的500条礼物记录
+                        self.redis_client.ltrim(gift_key, 0, 499)
+                except Exception as e:
+                    errors.append(f"清理Redis礼物数据失败: {e}")
+        
+        except Exception as e:
+            errors.append(f"迁移礼物数据失败: {e}")
+        
+        return success_count, failed_count, errors
+    
+    def cleanup_expired_redis_data(self, max_age_hours=24):
+        """清理过期的Redis数据"""
+        try:
+            logger.info(f"开始清理 {max_age_hours} 小时前的Redis数据")
+            
+            # 清理过期的统计数据
+            stats_keys = self.redis_client.keys('room:*:stats:*')
+            deleted_count = 0
+            
+            for key in stats_keys:
+                try:
+                    # 检查键的创建时间或TTL
+                    ttl = self.redis_client.ttl(key)
+                    if ttl == -1:  # 没有设置过期时间
+                        # 设置过期时间
+                        self.redis_client.expire(key, max_age_hours * 3600)
+                    
+                    deleted_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"处理键 {key} 时出错: {e}")
+            
+            logger.info(f"Redis清理完成，处理了 {deleted_count} 个键")
+            
+        except Exception as e:
+            logger.error(f"清理Redis数据时出错: {e}")
+    
+    def get_migration_stats(self, days=7):
+        """获取迁移统计信息"""
+        start_date = timezone.now() - timedelta(days=days)
+        
+        logs = DataMigrationLog.objects.filter(
+            created_at__gte=start_date
+        ).order_by('-created_at')
+        
+        stats = {
+            'total_migrations': logs.count(),
+            'successful_migrations': logs.filter(status='completed').count(),
+            'failed_migrations': logs.filter(status='failed').count(),
+            'partial_migrations': logs.filter(status='partial').count(),
+            'recent_logs': []
+        }
+        
+        for log in logs[:10]:  # 最近10条记录
+            stats['recent_logs'].append({
+                'type': log.migration_type,
+                'status': log.status,
+                'start_time': log.start_time,
+                'total_records': log.total_records,
+                'success_records': log.success_records,
+                'failed_records': log.failed_records,
+                'error_message': log.error_message[:200] if log.error_message else None
+            })
+        
+        return stats
 
 # 全局收集器实例
 _collector = None

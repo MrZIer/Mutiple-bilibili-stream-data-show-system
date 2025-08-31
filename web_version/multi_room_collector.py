@@ -22,6 +22,31 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+# 检查这个文件中是否有错误的导入，修复它们
+
+import sys
+import os
+import django
+
+# 添加Django项目路径
+project_path = os.path.join(os.path.dirname(__file__), '..', 'bilibili-live-monitor-django')
+sys.path.append(project_path)
+
+# 设置Django环境
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bilibili_monitor.settings')
+django.setup()
+
+# 正确的导入
+try:
+    from live_data.models import LiveRoom, DanmakuData, GiftData  # 使用LiveRoom而不是Room
+    print("✅ Django模型导入成功")
+except ImportError as e:
+    print(f"❌ Django模型导入失败: {e}")
+    # 如果导入失败，可以继续使用Redis存储
+    LiveRoom = None
+    DanmakuData = None
+    GiftData = None
+
 class MultiRoomCollector:
     """多房间实时数据收集器"""
     

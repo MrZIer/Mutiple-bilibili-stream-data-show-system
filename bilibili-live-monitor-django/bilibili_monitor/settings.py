@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'live_data',
+    # 'django_apscheduler',  # 如果使用APScheduler
 ]
 
 MIDDLEWARE = [
@@ -201,6 +202,17 @@ if DEBUG:
         'http://localhost:8000',
         'http://127.0.0.1:8000',
     ]
+
+# 数据迁移配置
+MIGRATION_BATCH_SIZE = 1000  # 批处理大小
+MIGRATION_MAX_RETRIES = 3    # 最大重试次数
+MIGRATION_MAX_AGE_HOURS = 6  # 迁移数据的最大年龄（小时）
+AUTO_CLEANUP_REDIS = True    # 是否自动清理Redis
+
+# APScheduler配置（如果使用）
+if 'django_apscheduler' in INSTALLED_APPS:
+    APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+    APSCHEDULER_RUN_NOW_TIMEOUT = 25  # 秒
 
 
 
