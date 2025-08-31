@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Bilibili 直播监控</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007cba;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007cba;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #005a8b;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .room-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .room-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .room-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .room-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .room-info p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .live-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-live {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status-offline {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .room-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .room-stat {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .room-stat-number {
+            font-weight: bold;
+            color: #007cba;
+        }
+        
+        .room-stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .danmaku-section, .gifts-section {
+            margin-top: 15px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007cba;
+        }
+        
+        .danmaku-list, .gifts-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        
+        .danmaku-item, .gift-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .danmaku-user, .gift-user {
+            font-weight: bold;
+            color: #007cba;
+        }
+        
+        .danmaku-message {
+            color: #333;
+            margin-left: 5px;
+        }
+        
+        .gift-info {
+            color: #e91e63;
+            font-weight: bold;
+        }
+        
+        .timestamp {
+            color: #999;
+            font-size: 11px;
+            float: right;
+        }
+        
+        .error-card {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .refresh-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .refresh-indicator.error {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部信息 -->
+        <div class="header">
+            <h1>
+                🎥 {{ page_title }}
+                <span style="font-size: 14px; color: #666; font-weight: normal;">
+                    {{ now|date:"Y-m-d H:i:s" }}
+                </span>
+            </h1>
+            
+            {% if error %}
+                <div class="error-card">
+                    <strong>❌ 错误:</strong> {{ error }}
+                </div>
+            {% else %}
+                {% if system_stats %}
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ total_rooms }}</div>
+                        <div class="stat-label">总房间数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ active_rooms_count }}</div>
+                        <div class="stat-label">活跃房间</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ system_stats.total_danmaku|default:0 }}</div>
+                        <div class="stat-label">总弹幕数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ system_stats.total_gifts|default:0 }}</div>
+                        <div class="stat-label">总礼物数</div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <a href="/live/" class="btn btn-primary">← 返回仪表板</a>
+                    <button onclick="refreshData()" class="btn btn-success">🔄 刷新数据</button>
+                    <button onclick="toggleAutoRefresh()" class="btn btn-warning" id="autoRefreshBtn">
+                        ⏰ 开启自动刷新
+                    </button>
+                    <button onclick="clearData()" class="btn btn-danger">🗑️ 清空显示</button>
+                </div>
+                
+                <div class="auto-refresh">
+                    <span>自动刷新状态:</span>
+                    <div class="refresh-indicator" id="refreshIndicator"></div>
+                    <span id="refreshStatus">已停止</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 房间网格 -->
+        <div id="roomsContainer">
+            {% if not error %}
+                <div class="loading">
+                    <p>📡 正在加载弹幕数据...</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let isAutoRefreshEnabled = false;
+        let lastUpdateTime = null;
+
+        // 格式化时间
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+        }
+
+        // 格式化相对时间
+        function getRelativeTime(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = Math.floor((now - time) / 1000);
+            
+            if (diff < 60) return `${diff}秒前`;
+            if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
+            return `${Math.floor(diff / 86400)}天前`;
+        }
+
+        // 创建房间卡片
+        function createRoomCard(roomData) {
+            const room = roomData.room_info;
+            const danmaku = roomData.recent_danmaku || [];
+            const gifts = roomData.recent_gifts || [];
+            
+            const statusClass = room.live_status === 1 ? 'status-live' : 'status-offline';
+            const statusText = room.live_status === 1 ? '🔴 直播中' : '⚫ 离线';
+            
+            let danmakuHtml = '';
+            if (danmaku.length > 0) {
+                danmakuHtml = danmaku.map(d => `
+                    <div class="danmaku-item">
+                        <span class="danmaku-user">${d.username || '匿名'}</span>
+                        <span class="danmaku-message">${d.message || ''}</span>
+                        <span class="timestamp">${getRelativeTime(d.timestamp)}</span>
+                    </div>
+                `).join('');
+            } else {
+                danmakuHtml = '<div class="no-data">暂无弹幕数据</div>';
+            }
+            
+            let giftsHtml = '';
+            if (gifts.length > 0) {
+                giftsHtml = gifts.map(g => `
+                    <div class="gift-item">
+                        <span class="gift-user">${g.username || '匿名'}</span>
+                        <span class="gift-info">送出 ${g.gift_name || '礼物'} x${g.gift_count || 1}</span>
+                        <span class="timestamp">${getRelativeTime(g.timestamp)}</span>
+                    </div>
+                `).join('');
+            } else {
+                giftsHtml = '<div class="no-data">暂无礼物数据</div>';
+            }
+            
+            return `
+                <div class="room-card">
+                    <div class="room-header">
+                        <img src="${room.face || '/static/default-avatar.png'}" 
+                             alt="${room.uname || '主播'}" 
+                             class="room-avatar"
+                             onerror="this.src='/static/default-avatar.png'">
+                        <div class="room-info">
+                            <h3>
+                                <a href="/live/room/${room.room_id}/" style="text-decoration: none; color: inherit;">
+                                    ${room.uname || `主播${room.room_id}`}
+                                </a>
+                                <span class="live-status ${statusClass}">${statusText}</span>
+                            </h3>
+                            <p>${(room.title || '无标题').substring(0, 50)}${room.title && room.title.length > 50 ? '...' : ''}</p>
+                            <p style="font-size: 12px;">房间号: ${room.room_id} | 分区: ${room.area_name || '未知'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="room-stats">
+                        <div class="room-stat">
+                            <div class="room-stat-number">${room.online || 0}</div>
+                            <div class="room-stat-label">在线人数</div>
+                        </div>
+                        <div class="room-stat">
+                            <div class="room-stat-number">${room.danmaku_count || 0}</div>
+                            <div class="room-stat-label">弹幕数</div>
+                        </div>
+                        <div class="room-stat">
+                            <div class="room-stat-number">${room.gift_count || 0}</div>
+                            <div class="room-stat-label">礼物数</div>
+                        </div>
+                    </div>
+                    
+                    <div class="danmaku-section">
+                        <div class="section-title">💬 最新弹幕</div>
+                        <div class="danmaku-list">${danmakuHtml}</div>
+                    </div>
+                    
+                    <div class="gifts-section">
+                        <div class="section-title">🎁 最新礼物</div>
+                        <div class="gifts-list">${giftsHtml}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                updateRefreshStatus('loading', '正在加载...');
+                
+                const response = await fetch('/live/api/danmaku-browser/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const container = document.getElementById('roomsContainer');
+                    
+                    if (data.data.rooms && data.data.rooms.length > 0) {
+                        const roomsHtml = data.data.rooms.map(createRoomCard).join('');
+                        container.innerHTML = `<div class="rooms-grid">${roomsHtml}</div>`;
+                    } else {
+                        container.innerHTML = `
+                            <div class="no-data" style="text-align: center; padding: 40px;">
+                                <h3>📭 暂无活跃房间</h3>
+                                <p>当前没有房间在直播或产生弹幕数据</p>
+                                <button onclick="refreshData()" class="btn btn-primary">重新加载</button>
+                            </div>
+                        `;
+                    }
+                    
+                    lastUpdateTime = new Date();
+                    updateRefreshStatus('success', `成功加载 ${data.data.rooms.length} 个房间`);
+                } else {
+                    throw new Error(data.error || '数据加载失败');
+                }
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                updateRefreshStatus('error', `加载失败: ${error.message}`);
+                
+                document.getElementById('roomsContainer').innerHTML = `
+                    <div class="error-card">
+                        <h3>❌ 数据加载失败</h3>
+                        <p>${error.message}</p>
+                        <button onclick="refreshData()" class="btn btn-primary">重试</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 更新刷新状态
+        function updateRefreshStatus(status, message) {
+            const indicator = document.getElementById('refreshIndicator');
+            const statusText = document.getElementById('refreshStatus');
+            
+            indicator.className = 'refresh-indicator';
+            
+            if (status === 'loading') {
+                indicator.classList.add('loading');
+                statusText.textContent = message;
+            } else if (status === 'success') {
+                statusText.textContent = `${message} (${formatTime(new Date())})`;
+            } else if (status === 'error') {
+                indicator.classList.add('error');
+                statusText.textContent = message;
+            }
+        }
+
+        // 手动刷新
+        function refreshData() {
+            loadData();
+        }
+
+        // 切换自动刷新
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('autoRefreshBtn');
+            
+            if (isAutoRefreshEnabled) {
+                clearInterval(autoRefreshInterval);
+                isAutoRefreshEnabled = false;
+                btn.textContent = '⏰ 开启自动刷新';
+                btn.className = 'btn btn-warning';
+                updateRefreshStatus('', '已停止');
+            } else {
+                autoRefreshInterval = setInterval(loadData, 10000); // 10秒刷新
+                isAutoRefreshEnabled = true;
+                btn.textContent = '⏸️ 停止自动刷新';
+                btn.className = 'btn btn-danger';
+                updateRefreshStatus('success', '自动刷新已启用');
+                loadData(); // 立即加载一次
+            }
+        }
+
+        // 清空显示
+        function clearData() {
+            document.getElementById('roomsContainer').innerHTML = `
+                <div class="no-data" style="text-align: center; padding: 40px;">
+                    <h3>🗑️ 数据已清空</h3>
+                    <p>点击刷新按钮重新加载数据</p>
+                    <button onclick="refreshData()" class="btn btn-primary">重新加载</button>
+                </div>
+            `;
+            updateRefreshStatus('', '数据已清空');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('弹幕浏览器页面加载完成');
+            
+            // 延迟1秒后加载数据，确保页面渲染完成
+            setTimeout(loadData, 1000);
+        });
+
+        // 页面即将卸载时清理定时器
+        window.addEventListener('beforeunload', function() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+INFO 2025-08-30 23:49:07,958 redis_config 31568 36228 Redis连接成功
+INFO 2025-08-30 23:49:07,963 services 31568 17112 房间 1923353057 监控线程启动
+INFO 2025-08-30 23:49:07,964 services 31568 36228 房间 1923353057 弹幕监听已启动
+INFO 2025-08-30 23:49:07,964 services 31568 17112 房间 1923353057 监控线程结束
+ERROR 2025-08-30 23:49:07,982 services 31568 36228 更新房间 1923353057 监控状态失败: no such table: live_data_room
+INFO 2025-08-30 23:49:45,544 services 31568 33820 房间 17961 监控线程启动
+INFO 2025-08-30 23:49:45,545 services 31568 36228 房间 17961 弹幕监听已启动
+INFO 2025-08-30 23:49:45,545 services 31568 33820 房间 17961 监控线程结束
+ERROR 2025-08-30 23:49:45,546 services 31568 36228 更新房间 17961 监控状态失败: no such table: live_data_room
+INFO 2025-08-31 00:22:05,346 redis_config 31416 35464 Redis连接成功
+INFO 2025-08-31 00:22:13,839 services 31416 30492 房间 6 监控线程启动
+INFO 2025-08-31 00:22:13,839 services 31416 30492 房间 6 监控线程结束
+INFO 2025-08-31 00:22:13,840 services 31416 35464 房间 6 弹幕监听已启动
+INFO 2025-08-31 00:22:13,851 services 31416 35464 开始监控房间 6
+INFO 2025-08-31 00:22:13,852 services 31416 24864 房间 1923353057 监控线程启动
+INFO 2025-08-31 00:22:13,853 services 31416 24864 房间 1923353057 监控线程结束
+INFO 2025-08-31 00:22:13,853 services 31416 35464 房间 1923353057 弹幕监听已启动
+INFO 2025-08-31 00:22:13,861 services 31416 35464 开始监控房间 1923353057
+ERROR 2025-08-31 00:22:48,500 bilibili_client 31416 35464 停止房间 6 弹幕监听失败: Task <Task pending name='Task-38' coro=<LiveDanmakuCollector.stop() running at G:\Github_Project\bilibili_data\bilibili-live-monitor-django\utils\bilibili_client.py:212> cb=[_run_until_complete_cb() at E:\Anaconda\Anaconda\Lib\asyncio\base_events.py:180]> got Future <Future pending> attached to a different loop
+INFO 2025-08-31 00:22:48,506 services 31416 35464 房间 6 弹幕监听已停止
+INFO 2025-08-31 00:22:48,513 services 31416 35464 停止监控房间 6
+ERROR 2025-08-31 00:22:48,515 bilibili_client 31416 35464 停止房间 1923353057 弹幕监听失败: Task <Task pending name='Task-41' coro=<LiveDanmakuCollector.stop() running at G:\Github_Project\bilibili_data\bilibili-live-monitor-django\utils\bilibili_client.py:212> cb=[_run_until_complete_cb() at E:\Anaconda\Anaconda\Lib\asyncio\base_events.py:180]> got Future <Future pending> attached to a different loop
+INFO 2025-08-31 00:22:48,516 services 31416 35464 房间 1923353057 弹幕监听已停止
+INFO 2025-08-31 00:22:48,520 services 31416 35464 停止监控房间 1923353057
+INFO 2025-08-31 00:22:48,521 services 31416 35464 已停止所有房间监控
+INFO 2025-08-31 00:22:48,816 bilibili_client 31416 32112 房间 1923353057 弹幕监听已启动
+INFO 2025-08-31 00:22:48,880 bilibili_client 31416 15640 房间 6 弹幕监听已启动
+INFO 2025-08-31 00:26:23,629 redis_config 36740 13316 Redis连接成功
+INFO 2025-08-31 00:26:26,943 services 36740 2956 房间 6 监控线程启动
+INFO 2025-08-31 00:26:26,943 services 36740 2956 房间 6 监控线程结束
+INFO 2025-08-31 00:26:26,943 services 36740 13316 房间 6 弹幕监听已启动
+INFO 2025-08-31 00:26:26,951 services 36740 13316 开始监控房间 6
+INFO 2025-08-31 00:26:26,952 services 36740 29480 房间 1923353057 监控线程启动
+INFO 2025-08-31 00:26:26,952 services 36740 29480 房间 1923353057 监控线程结束
+INFO 2025-08-31 00:26:26,952 services 36740 13316 房间 1923353057 弹幕监听已启动
+INFO 2025-08-31 00:26:26,987 services 36740 13316 开始监控房间 1923353057
+INFO 2025-08-31 00:29:42,536 redis_config 24176 20600 Redis连接成功
+DanmakuService初始化成功
+DanmakuService初始化成功
+DanmakuService初始化成功
+DanmakuService初始化成功
+API调用: api_room_list, 参数: (), {}
+DanmakuService初始化成功
+API成功: api_room_list
+API调用: api_room_list, 参数: (), {}
+DanmakuService初始化成功
+API成功: api_room_list
+API调用: api_system_stats, 参数: (), {}
+DanmakuService初始化成功
+API成功: api_system_stats
+API调用: api_system_stats, 参数: (), {}
+DanmakuService初始化成功
+API成功: api_system_stats
+API调用: api_room_danmaku, 参数: (), {'room_id': 24486091}
+DanmakuService初始化成功
+弹幕API请求: 房间24486091, 关键词:, 用户:, 限制:50
+API成功: api_room_danmaku
+API调用: api_room_danmaku, 参数: (), {'room_id': 24486091}
+DanmakuService初始化成功
+弹幕API请求: 房间24486091, 关键词:, 用户:, 限制:50
+API成功: api_room_danmaku
+找到 0 个弹幕数据键
+成功获取 0 个房间
+找到 0 个弹幕数据键
+成功获取 0 个房间
+找到 0 个弹幕数据键
+成功获取 0 个房间
+找到 0 个弹幕数据键
+成功获取 0 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+找到 1 个弹幕数据键
+成功获取 1 个房间
+正在初始化Redis连接...
+获取系统统计信息...
+Redis连接正常，获取详细统计...
+找到 1 个弹幕数据键
+成功获取 1 个房间数据
+统计信息获取成功: 1个房间, 519条弹幕
+正在初始化Redis连接...
+获取系统统计信息...
+Redis连接正常，获取详细统计...
+找到 1 个弹幕数据键
+成功获取 1 个房间数据
+统计信息获取成功: 1个房间, 1001条弹幕
+找到 1 个弹幕数据键
+成功获取 1 个房间数据
+Dashboard页面请求开始
+正在初始化Redis连接...
+DanmakuService初始化完成
+获取系统统计信息...
+Redis连接正常，获取详细统计...
+找到 1 个弹幕数据键
+成功获取 1 个房间数据
+统计信息获取成功: 1个房间, 1000条弹幕
+系统统计获取完成: {'total_rooms': 1, 'active_rooms': 1, 'total_danmaku': 1000, 'total_gifts': 2023, 'redis_status': 'connected', 'redis_message': 'Redis连接正常'}
+找到 1 个弹幕数据键
+成功获取 1 个房间数据
+获取到 1 个活跃房间
+Dashboard上下文构建完成: Redis状态=connected

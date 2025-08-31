@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房间 {{ room_id }} - Bilibili 直播监控</title>
+    <style>
+        body { 
+            font-family: 'Microsoft YaHei', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f5f5f5; 
+            line-height: 1.4;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            position: relative;
+        }
+        .room-cover {
+            width: 120px;
+            height: 68px;
+            border-radius: 6px;
+            object-fit: cover;
+            float: left;
+            margin-right: 20px;
+            border: 2px solid #ddd;
+        }
+        .room-basic-info {
+            overflow: hidden;
+        }
+        .room-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .room-subtitle {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .status-indicator { 
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+            font-weight: 500;
+        }
+        .status-connected { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 20px;
+        }
+        .grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            position: relative;
+        }
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin: 15px 0; 
+        }
+        .stat-item { 
+            text-align: center; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-radius: 6px; 
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .stat-item.updated {
+            border-color: #28a745;
+            background: #d4edda;
+            transform: scale(1.02);
+        }
+        .stat-number { 
+            font-size: 1.8em; 
+            font-weight: bold; 
+            color: #007cba; 
+            transition: color 0.3s ease;
+        }
+        .stat-number.updated {
+            color: #28a745;
+        }
+        .stat-label { 
+            color: #666; 
+            font-size: 0.85em; 
+            margin-top: 5px; 
+        }
+        
+        .danmaku-item, .gift-item { 
+            padding: 12px; 
+            border: 1px solid #e9ecef; 
+            border-radius: 6px; 
+            margin-bottom: 8px; 
+            transition: all 0.3s ease;
+            background: white;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: slideInFromTop 0.5s ease-out forwards;
+        }
+        
+        .danmaku-item:hover, .gift-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .danmaku-item.new, .gift-item.new {
+            border-color: #28a745;
+            background: linear-gradient(90deg, #f8fff9, #e8f5e8);
+            animation: slideInFromTop 0.5s ease-out forwards, newItemPulse 2s ease-out;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .danmaku-user, .gift-user {
+            font-weight: bold;
+            color: #007cba;
+            margin-right: 8px;
+        }
+        .danmaku-message {
+            color: #333;
+        }
+        .danmaku-time, .gift-time {
+            font-size: 0.8em;
+            color: #666;
+            float: right;
+        }
+        .gift-info {
+            color: #e91e63;
+            font-weight: 500;
+        }
+        
+        .control-panel { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            border: 1px solid #dee2e6;
+        }
+        .control-row { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            margin: 8px 0; 
+            flex-wrap: wrap; 
+        }
+        .control-label { 
+            min-width: 80px; 
+            font-weight: 500; 
+            color: #495057;
+        }
+        
+        .btn { 
+            padding: 8px 16px; 
+            background: #007cba; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            text-decoration: none;
+            display: inline-block; 
+            margin: 2px; 
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { 
+            background: #005a8b; 
+            transform: translateY(-1px);
+        }
+        .btn.small { padding: 6px 12px; font-size: 0.8em; }
+        .btn.success { background: #28a745; }
+        .btn.success:hover { background: #1e7e34; }
+        .btn.warning { background: #ffc107; color: #212529; }
+        .btn.warning:hover { background: #e0a800; }
+        .btn.danger { background: #dc3545; }
+        .btn.danger:hover { background: #c82333; }
+        
+        .refresh-indicator { 
+            display: inline-block; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            font-size: 0.8em; 
+            margin-left: 10px; 
+            transition: all 0.3s ease;
+        }
+        .refresh-indicator.active { background: #28a745; color: white; }
+        .refresh-indicator.paused { background: #ffc107; color: #212529; }
+        
+        .message-box {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .message-box.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-box.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message-box.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .message-box.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007cba;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        
+        /* 核心改进：弹幕容器样式 */
+        .data-container {
+            height: 400px; /* 固定高度 */
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse; /* 关键：反向排列，新内容在上方 */
+        }
+        
+        /* 弹幕容器内容区域 */
+        .danmaku-list, .gift-list {
+            display: flex;
+            flex-direction: column-reverse; /* 新消息在顶部 */
+            min-height: min-content;
+        }
+        
+        /* 固定滚动条位置 */
+        .data-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .data-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .data-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .data-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* 自动置顶指示器 */
+        .auto-scroll-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 124, 186, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .auto-scroll-indicator.show {
+            opacity: 1;
+        }
+
+        .uploader-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .uploader-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 3px solid #ddd;
+        }
+
+        .room-cover {
+            width: 120px;
+            height: 68px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-right: 20px;
+            border: 2px solid #ddd;
+        }
+
+        .verified-badge {
+            font-size: 0.8em;
+            margin-left: 8px;
+            color: #28a745;
+        }
+
+        .room-meta {
+            color: #666;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .uploader-links {
+            margin-top: 10px;
+        }
+
+        .uploader-links .btn {
+            margin-right: 8px;
+            font-size: 0.8em;
+            padding: 4px 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px dashed #dee2e6;
+            margin: auto; /* 在 flex-direction: column-reverse 中居中 */
+        }
+        
+        .last-update {
+            font-size: 0.8em;
+            color: #666;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        /* 滚动控制按钮 */
+        .scroll-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        
+        .scroll-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 124, 186, 0.8);
+            color: white;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .scroll-btn:hover {
+            background: rgba(0, 124, 186, 1);
+            transform: scale(1.1);
+        }
+        
+        .scroll-btn.disabled {
+            background: rgba(108, 117, 125, 0.5);
+            cursor: not-allowed;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideInFromTop {
+            0% { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes newItemPulse {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); 
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); 
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .grid { grid-template-columns: 1fr; }
+            .grid.three-col { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .room-cover { 
+                width: 80px; 
+                height: 45px; 
+                margin-bottom: 10px; 
+            }
+            .control-row { flex-direction: column; align-items: flex-start; }
+            .data-container { height: 300px; } /* 移动端稍微降低高度 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <div class="uploader-info">
+                {% if room_info.face %}
+                    <img src="{{ room_info.face }}" alt="UP主头像" class="uploader-avatar" onerror="this.style.display='none'">
+                {% endif %}
+                
+                {% if room_info.cover %}
+                    <img src="{{ room_info.cover }}" alt="直播封面" class="room-cover" onerror="this.style.display='none'">
+                {% endif %}
+            </div>
+            
+            <div class="room-basic-info">
+                <div class="room-title">
+                    {{ room_info.uname|default:"未知主播" }}
+                    {% if room_info.is_verified %}
+                        <span class="verified-badge" title="{{ room_info.verify_desc }}">✅</span>
+                    {% endif %}
+                    <small style="color: #666;">({{ room_id }})</small>
+                </div>
+                
+                <div class="room-subtitle">{{ room_info.title|default:"直播中..." }}</div>
+                
+                <div class="room-meta">
+                    📍 {{ room_info.parent_area_name|default:"未知" }} - {{ room_info.area_name|default:"未知" }}
+                    {% if room_info.gender_text %}
+                        | 👤 {{ room_info.gender_text }}
+                    {% endif %}
+                    {% if room_info.attention %}
+                        | 👥 {{ room_info.attention|floatformat:0 }} 关注
+                    {% endif %}
+                    {% if room_info.live_status == 1 %}
+                        <span style="color: #28a745; margin-left: 10px;">🔴 正在直播</span>
+                    {% endif %}
+                </div>
+                
+                {% if room_info.uid %}
+                <div class="uploader-links">
+                    <a href="https://space.bilibili.com/{{ room_info.uid }}" target="_blank" class="btn small">
+                        👤 访问UP主页
+                    </a>
+                    <a href="https://live.bilibili.com/{{ room_id }}" target="_blank" class="btn small">
+                        📺 访问直播间
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="status-indicator {% if redis_status == 'connected' %}status-connected{% else %}status-error{% endif %}" 
+                 id="connection-status">
+                {% if redis_status == 'connected' %}
+                    ✅ 连接正常
+                {% else %}
+                    ❌ 连接失败
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <div class="control-row">
+                <span class="control-label">快速操作:</span>
+                <a href="/live/" class="btn">← 返回仪表板</a>
+                <button onclick="refreshAllData()" class="btn success">🔄 刷新数据</button>
+                <button onclick="clearAllData()" class="btn warning">🗑️ 清空显示</button>
+            </div>
+            
+            <div class="control-row">
+                <span class="control-label">实时更新:</span>
+                <button onclick="toggleAutoRefresh()" class="btn" id="auto-refresh-btn">⏸️ 暂停</button>
+                <select id="refresh-interval" onchange="changeRefreshInterval()">
+                    <option value="1000">1秒</option>
+                    <option value="2000" selected>2秒</option>
+                    <option value="5000">5秒</option>
+                    <option value="10000">10秒</option>
+                </select>
+                <span class="refresh-indicator active" id="refresh-indicator">⏱️ 自动刷新: 2秒</span>
+            </div>
+            
+            <div class="control-row">
+                <span class="control-label">显示设置:</span>
+                <label>
+                    <input type="checkbox" id="auto-scroll-top" checked> 新消息自动置顶
+                </label>
+                <label>
+                    <input type="checkbox" id="show-scroll-controls" checked> 显示滚动控制
+                </label>
+                <label>
+                    <input type="checkbox" id="highlight-new" checked> 高亮新消息
+                </label>
+            </div>
+            
+            <div class="control-row">
+                <span class="control-label">统计:</span>
+                <span id="update-counter">更新: 0</span>
+                <span id="new-danmaku-counter">新弹幕: 0</span>
+                <span id="new-gifts-counter">新礼物: 0</span>
+                <span id="last-update-time">最后更新: --:--:--</span>
+            </div>
+        </div>
+
+        <!-- 房间统计 -->
+        <div class="card">
+            <h3>📊 房间统计 <span class="loading-spinner" id="stats-loading" style="display: none;"></span></h3>
+            
+            <div class="stats-grid">
+                <div class="stat-item" id="stat-danmaku-count">
+                    <div class="stat-number" id="danmaku-count">{{ room_stats.danmaku_count|default:0 }}</div>
+                    <div class="stat-label">弹幕总数</div>
+                </div>
+                <div class="stat-item" id="stat-gift-count">
+                    <div class="stat-number" id="gift-count">{{ room_stats.gift_count|default:0 }}</div>
+                    <div class="stat-label">礼物总数</div>
+                </div>
+                <div class="stat-item" id="stat-popularity">
+                    <div class="stat-number" id="popularity">{{ room_info.popularity|default:0 }}</div>
+                    <div class="stat-label">人气值</div>
+                </div>
+                <div class="stat-item" id="stat-live-time">
+                    <div class="stat-number" id="live-time">{{ room_stats.duration|default:"--:--" }}</div>
+                    <div class="stat-label">监控时长</div>
+                </div>
+            </div>
+            
+            <div class="last-update" id="stats-last-update">
+                {% if room_stats %}更新于 {{ room_stats.last_update_time|default:"未知" }}{% endif %}
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- 实时弹幕 -->
+            <div class="card">
+                <h3>💬 实时弹幕 
+                    <small id="danmaku-count-display">({{ recent_danmaku|length }})</small>
+                    <span class="loading-spinner" id="danmaku-loading" style="display: none;"></span>
+                </h3>
+                
+                <div class="data-container" id="danmaku-container">
+                    <div class="auto-scroll-indicator" id="danmaku-scroll-indicator">新消息已置顶</div>
+                    
+                    <div class="scroll-controls" id="danmaku-scroll-controls">
+                        <button class="scroll-btn" onclick="scrollToTop('danmaku-container')" title="滚动到顶部">↑</button>
+                        <button class="scroll-btn" onclick="scrollToBottom('danmaku-container')" title="滚动到底部">↓</button>
+                    </div>
+                    
+                    <div class="danmaku-list" id="danmaku-list">
+                        {% if recent_danmaku %}
+                            {% for danmaku in recent_danmaku %}
+                            <div class="danmaku-item" data-id="{{ danmaku.id|default:forloop.counter }}">
+                                <span class="danmaku-user">{{ danmaku.username|default:"匿名用户" }}</span>
+                                <span class="danmaku-message">{{ danmaku.message|default:"" }}</span>
+                                <span class="danmaku-time">{{ danmaku.timestamp|default:"未知时间" }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state" id="danmaku-empty">
+                                📭 暂无弹幕数据<br>
+                                <small>等待实时数据或检查数据收集器状态</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="last-update" id="danmaku-last-update">
+                    最后更新: <span id="danmaku-update-time">{{ now|date:"H:i:s" }}</span>
+                </div>
+            </div>
+
+            <!-- 实时礼物 -->
+            <div class="card">
+                <h3>🎁 实时礼物 
+                    <small id="gifts-count-display">({{ recent_gifts|length }})</small>
+                    <span class="loading-spinner" id="gifts-loading" style="display: none;"></span>
+                </h3>
+                
+                <div class="data-container" id="gifts-container">
+                    <div class="auto-scroll-indicator" id="gifts-scroll-indicator">新消息已置顶</div>
+                    
+                    <div class="scroll-controls" id="gifts-scroll-controls">
+                        <button class="scroll-btn" onclick="scrollToTop('gifts-container')" title="滚动到顶部">↑</button>
+                        <button class="scroll-btn" onclick="scrollToBottom('gifts-container')" title="滚动到底部">↓</button>
+                    </div>
+                    
+                    <div class="gift-list" id="gift-list">
+                        {% if recent_gifts %}
+                            {% for gift in recent_gifts %}
+                            <div class="gift-item" data-id="{{ gift.id|default:forloop.counter }}">
+                                <span class="gift-user">{{ gift.username|default:"匿名用户" }}</span>
+                                <span class="gift-info">
+                                    送出 {{ gift.gift_name|default:"礼物" }} x{{ gift.num|default:1 }}
+                                    ({{ gift.price|default:0 }}金瓜子)
+                                </span>
+                                <span class="gift-time">{{ gift.timestamp|default:"未知时间" }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state" id="gifts-empty">
+                                🎁 暂无礼物数据<br>
+                                <small>等待实时数据或检查数据收集器状态</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="last-update" id="gifts-last-update">
+                    最后更新: <span id="gifts-update-time">{{ now|date:"H:i:s" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作结果 -->
+        <div id="operation-result"></div>
+
+        <!-- 错误信息 -->
+        {% if error %}
+        <div class="message-box error">
+            <strong>❌ 加载错误:</strong> {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    {% csrf_token %}
+    
+    <script>
+        // ===== 全局配置和状态 =====
+        const RoomConfig = {
+            roomId: {{ room_id }},
+            refreshInterval: 2000,
+            maxDanmaku: 50,
+            maxGifts: 30,
+            animationDuration: 300,
+            debugMode: true,
+            autoScrollTop: true,
+            showScrollControls: true,
+            highlightNew: true
+        };
+        
+        const RoomState = {
+            autoRefreshEnabled: true,
+            updateInterval: null,
+            isUpdating: false,
+            updateCount: 0,
+            newDanmakuCount: 0,
+            newGiftsCount: 0,
+            lastDanmakuIds: new Set(),
+            lastGiftIds: new Set(),
+            lastStats: {
+                danmaku_count: 0,
+                gift_count: 0,
+                popularity: 0
+            },
+            scrollPositions: {
+                danmaku: 0,
+                gifts: 0
+            }
+        };
+        
+        // ===== 工具函数 =====
+        function debugLog(message, data = null) {
+            if (RoomConfig.debugMode) {
+                console.log(`[RoomDetail] ${message}`, data || '');
+            }
+        }
+        
+        function getCSRFToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            return token ? token.value : '';
+        }
+        
+        function showMessage(message, type = 'info', duration = 5000) {
+            const resultDiv = document.getElementById('operation-result');
+            if (!resultDiv) return;
+            
+            resultDiv.className = `message-box ${type}`;
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    resultDiv.style.display = 'none';
+                }, duration);
+            }
+        }
+        
+        function updateCounter(counterId, increment = 1) {
+            const element = document.getElementById(counterId);
+            if (element) {
+                const current = parseInt(element.textContent.split(': ')[1]) || 0;
+                element.textContent = element.textContent.split(': ')[0] + ': ' + (current + increment);
+            }
+        }
+        
+        function setLoadingState(elementId, isLoading) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.style.display = isLoading ? 'inline-block' : 'none';
+            }
+        }
+        
+        function formatTime(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString();
+            } catch {
+                return timestamp || '未知时间';
+            }
+        }
+        
+        function animateStatUpdate(containerId, numberId) {
+            const container = document.getElementById(containerId);
+            const number = document.getElementById(numberId);
+            
+            if (container && number) {
+                container.classList.add('updated');
+                number.classList.add('updated');
+                
+                setTimeout(() => {
+                    container.classList.remove('updated');
+                    number.classList.remove('updated');
+                }, 1000);
+            }
+        }
+        
+        // ===== 滚动控制函数 =====
+        function scrollToTop(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.scrollTop = 0;
+                debugLog(`${containerId} 滚动到顶部`);
+            }
+        }
+        
+        function scrollToBottom(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+                debugLog(`${containerId} 滚动到底部`);
+            }
+        }
+        
+        function showScrollIndicator(containerId, message = '新消息已置顶') {
+            const indicator = document.getElementById(containerId.replace('-container', '-scroll-indicator'));
+            if (indicator) {
+                indicator.textContent = message;
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
+        }
+        
+        function updateScrollControls() {
+            const showControls = document.getElementById('show-scroll-controls').checked;
+            const controls = document.querySelectorAll('.scroll-controls');
+            controls.forEach(control => {
+                control.style.display = showControls ? 'flex' : 'none';
+            });
+        }
+        
+        // ===== API调用函数 =====
+        async function apiCall(url, options = {}) {
+            debugLog(`API调用: ${url}`);
+            
+            const defaultOptions = {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+                ...options
+            };
+            
+            try {
+                const response = await fetch(url, defaultOptions);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog(`API响应: ${url}`, { success: data.success, hasData: !!data.data });
+                
+                return { success: true, data };
+            } catch (error) {
+                debugLog(`API调用失败: ${url}`, { error: error.message });
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // ===== 数据更新函数 =====
+        async function updateRoomStats() {
+            debugLog('更新房间统计');
+            setLoadingState('stats-loading', true);
+            
+            const result = await apiCall(`/live/api/room/${RoomConfig.roomId}/stats/`);
+            
+            if (result.success && result.data.success && result.data.data) {
+                const stats = result.data.data.stats || {};
+                const roomInfo = result.data.data.room_info || {};
+                
+                // 检查数据变化并更新
+                const updates = [
+                    { id: 'danmaku-count', value: stats.danmaku_count || 0, containerId: 'stat-danmaku-count' },
+                    { id: 'gift-count', value: stats.gift_count || 0, containerId: 'stat-gift-count' },
+                    { id: 'popularity', value: roomInfo.popularity || 0, containerId: 'stat-popularity' }
+                ];
+                
+                updates.forEach(update => {
+                    const element = document.getElementById(update.id);
+                    if (element) {
+                        const oldValue = parseInt(element.textContent.replace(/,/g, ''));
+                        const newValue = update.value;
+                        
+                        if (oldValue !== newValue) {
+                            element.textContent = newValue.toLocaleString();
+                            animateStatUpdate(update.containerId, update.id);
+                        }
+                    }
+                });
+                
+                // 更新时间显示
+                const updateTime = document.getElementById('stats-last-update');
+                if (updateTime) {
+                    updateTime.textContent = `更新于 ${new Date().toLocaleTimeString()}`;
+                }
+                
+                RoomState.lastStats = {
+                    danmaku_count: stats.danmaku_count || 0,
+                    gift_count: stats.gift_count || 0,
+                    popularity: roomInfo.popularity || 0
+                };
+                
+                debugLog('房间统计更新完成', stats);
+                return true;
+            } else {
+                debugLog('房间统计更新失败', result);
+                return false;
+            }
+            
+            setLoadingState('stats-loading', false);
+        }
+        
+        async function updateDanmaku() {
+            debugLog('更新弹幕数据');
+            setLoadingState('danmaku-loading', true);
+            
+            const result = await apiCall(`/live/api/room/${RoomConfig.roomId}/danmaku/?limit=${RoomConfig.maxDanmaku}`);
+            
+            if (result.success && result.data.success && result.data.data) {
+                const danmakuList = result.data.data.danmaku || [];
+                const container = document.getElementById('danmaku-list');
+                const emptyState = document.getElementById('danmaku-empty');
+                const countDisplay = document.getElementById('danmaku-count-display');
+                const autoScrollTop = document.getElementById('auto-scroll-top').checked;
+                const highlightNew = document.getElementById('highlight-new').checked;
+                
+                if (danmakuList.length > 0) {
+                    // 检查新弹幕
+                    let newCount = 0;
+                    const currentIds = new Set();
+                    let hasNewItems = false;
+                    
+                    // 按时间排序，最新的在前
+                    danmakuList.sort((a, b) => {
+                        const timeA = new Date(a.timestamp || 0).getTime();
+                        const timeB = new Date(b.timestamp || 0).getTime();
+                        return timeB - timeA; // 降序，新的在前
+                    });
+                    
+                    const danmakuHtml = danmakuList.map((danmaku, index) => {
+                        const danmakuId = danmaku.id || `${danmaku.timestamp}_${index}`;
+                        currentIds.add(danmakuId);
+                        
+                        const isNew = !RoomState.lastDanmakuIds.has(danmakuId);
+                        if (isNew) {
+                            newCount++;
+                            hasNewItems = true;
+                        }
+                        
+                        const newClass = (isNew && highlightNew) ? 'new' : '';
+                        
+                        return `
+                            <div class="danmaku-item ${newClass}" data-id="${danmakuId}">
+                                <span class="danmaku-user">${danmaku.username || '匿名用户'}</span>
+                                <span class="danmaku-message">${danmaku.message || ''}</span>
+                                <span class="danmaku-time">${formatTime(danmaku.timestamp)}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // 保存当前滚动位置
+                    const danmakuContainer = document.getElementById('danmaku-container');
+                    const wasAtTop = danmakuContainer.scrollTop === 0;
+                    
+                    container.innerHTML = danmakuHtml;
+                    RoomState.lastDanmakuIds = currentIds;
+                    
+                    if (newCount > 0) {
+                        RoomState.newDanmakuCount += newCount;
+                        updateCounter('new-danmaku-counter', newCount);
+                        
+                        // 如果开启自动置顶且有新消息
+                        if (autoScrollTop && hasNewItems) {
+                            scrollToTop('danmaku-container');
+                            showScrollIndicator('danmaku-container', `${newCount} 条新弹幕已置顶`);
+                        }
+                    }
+                    
+                    // 隐藏空状态
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+                    
+                } else {
+                    if (emptyState) {
+                        emptyState.style.display = 'block';
+                    }
+                }
+                
+                // 更新计数显示
+                if (countDisplay) {
+                    countDisplay.textContent = `(${danmakuList.length})`;
+                }
+                
+                // 更新时间
+                const updateTime = document.getElementById('danmaku-update-time');
+                if (updateTime) {
+                    updateTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                debugLog('弹幕数据更新完成', { count: danmakuList.length, newCount });
+                return true;
+            } else {
+                debugLog('弹幕数据更新失败', result);
+                return false;
+            }
+            
+            setLoadingState('danmaku-loading', false);
+        }
+        
+        async function updateGifts() {
+            debugLog('更新礼物数据');
+            setLoadingState('gifts-loading', true);
+            
+            const result = await apiCall(`/live/api/room/${RoomConfig.roomId}/gifts/?limit=${RoomConfig.maxGifts}`);
+            
+            if (result.success && result.data.success && result.data.data) {
+                const giftsList = result.data.data.gifts || [];
+                const container = document.getElementById('gift-list');
+                const emptyState = document.getElementById('gifts-empty');
+                const countDisplay = document.getElementById('gifts-count-display');
+                const autoScrollTop = document.getElementById('auto-scroll-top').checked;
+                const highlightNew = document.getElementById('highlight-new').checked;
+                
+                if (giftsList.length > 0) {
+                    // 检查新礼物
+                    let newCount = 0;
+                    const currentIds = new Set();
+                    let hasNewItems = false;
+                    
+                    // 按时间排序，最新的在前
+                    giftsList.sort((a, b) => {
+                        const timeA = new Date(a.timestamp || 0).getTime();
+                        const timeB = new Date(b.timestamp || 0).getTime();
+                        return timeB - timeA; // 降序，新的在前
+                    });
+                    
+                    const giftsHtml = giftsList.map((gift, index) => {
+                        const giftId = gift.id || `${gift.timestamp}_${index}`;
+                        currentIds.add(giftId);
+                        
+                        const isNew = !RoomState.lastGiftIds.has(giftId);
+                        if (isNew) {
+                            newCount++;
+                            hasNewItems = true;
+                        }
+                        
+                        const newClass = (isNew && highlightNew) ? 'new' : '';
+                        
+                        return `
+                            <div class="gift-item ${newClass}" data-id="${giftId}">
+                                <span class="gift-user">${gift.username || '匿名用户'}</span>
+                                <span class="gift-info">
+                                    送出 ${gift.gift_name || '礼物'} x${gift.num || 1}
+                                    (${gift.price || 0}金瓜子)
+                                </span>
+                                <span class="gift-time">${formatTime(gift.timestamp)}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // 保存当前滚动位置
+                    const giftsContainer = document.getElementById('gifts-container');
+                    const wasAtTop = giftsContainer.scrollTop === 0;
+                    
+                    container.innerHTML = giftsHtml;
+                    RoomState.lastGiftIds = currentIds;
+                    
+                    if (newCount > 0) {
+                        RoomState.newGiftsCount += newCount;
+                        updateCounter('new-gifts-counter', newCount);
+                        
+                        // 如果开启自动置顶且有新消息
+                        if (autoScrollTop && hasNewItems) {
+                            scrollToTop('gifts-container');
+                            showScrollIndicator('gifts-container', `${newCount} 个新礼物已置顶`);
+                        }
+                    }
+                    
+                    // 隐藏空状态
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+                    
+                } else {
+                    if (emptyState) {
+                        emptyState.style.display = 'block';
+                    }
+                }
+                
+                // 更新计数显示
+                if (countDisplay) {
+                    countDisplay.textContent = `(${giftsList.length})`;
+                }
+                
+                // 更新时间
+                const updateTime = document.getElementById('gifts-update-time');
+                if (updateTime) {
+                    updateTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                debugLog('礼物数据更新完成', { count: giftsList.length, newCount });
+                return true;
+            } else {
+                debugLog('礼物数据更新失败', result);
+                return false;
+            }
+            
+            setLoadingState('gifts-loading', false);
+        }
+        
+        // ===== 主要控制函数 =====
+        async function refreshAllData() {
+            if (RoomState.isUpdating) {
+                debugLog('跳过更新：已有更新在进行中');
+                return;
+            }
+            
+            RoomState.isUpdating = true;
+            RoomState.updateCount++;
+            
+            updateCounter('update-counter');
+            
+            const lastUpdateTime = document.getElementById('last-update-time');
+            if (lastUpdateTime) {
+                lastUpdateTime.textContent = `最后更新: ${new Date().toLocaleTimeString()}`;
+            }
+            
+            debugLog(`开始第${RoomState.updateCount}次数据刷新`);
+            
+            try {
+                // 并行执行所有更新
+                const [statsResult, danmakuResult, giftsResult] = await Promise.allSettled([
+                    updateRoomStats(),
+                    updateDanmaku(),
+                    updateGifts()
+                ]);
+                
+                const successes = [statsResult, danmakuResult, giftsResult].filter(
+                    r => r.status === 'fulfilled' && r.value
+                ).length;
+                
+                debugLog(`数据刷新完成`, { 
+                    total: 3, 
+                    success: successes,
+                    statsOk: statsResult.status === 'fulfilled' && statsResult.value,
+                    danmakuOk: danmakuResult.status === 'fulfilled' && danmakuResult.value,
+                    giftsOk: giftsResult.status === 'fulfilled' && giftsResult.value
+                });
+                
+                if (successes === 3) {
+                    if (RoomState.updateCount % 20 === 0) { // 每20次更新显示一次成功消息
+                        showMessage('✅ 数据刷新完成', 'success', 2000);
+                    }
+                } else if (successes > 0) {
+                    showMessage(`⚠️ 部分数据更新失败 (${successes}/3)`, 'warning', 3000);
+                } else {
+                    showMessage('❌ 数据刷新失败', 'error', 5000);
+                }
+                
+            } catch (error) {
+                debugLog('数据刷新异常', { error: error.message });
+                showMessage(`❌ 数据刷新失败: ${error.message}`, 'error', 5000);
+            } finally {
+                RoomState.isUpdating = false;
+            }
+        }
+        
+        function clearAllData() {
+            debugLog('清空显示数据');
+            
+            // 清空计数器
+            RoomState.newDanmakuCount = 0;
+            RoomState.newGiftsCount = 0;
+            RoomState.lastDanmakuIds.clear();
+            RoomState.lastGiftIds.clear();
+            
+            // 重置计数器显示
+            document.getElementById('new-danmaku-counter').textContent = '新弹幕: 0';
+            document.getElementById('new-gifts-counter').textContent = '新礼物: 0';
+            
+            showMessage('🗑️ 显示数据已清空', 'info', 2000);
+        }
+        
+        function toggleAutoRefresh() {
+            RoomState.autoRefreshEnabled = !RoomState.autoRefreshEnabled;
+            
+            const btn = document.getElementById('auto-refresh-btn');
+            const indicator = document.getElementById('refresh-indicator');
+            
+            if (RoomState.autoRefreshEnabled) {
+                btn.textContent = '⏸️ 暂停';
+                btn.className = 'btn';
+                indicator.className = 'refresh-indicator active';
+                indicator.textContent = `⏱️ 自动刷新: ${RoomConfig.refreshInterval/1000}秒`;
+                
+                startAutoRefresh();
+                showMessage('▶️ 自动刷新已启动', 'success', 2000);
+                debugLog('自动刷新已启动');
+            } else {
+                btn.textContent = '▶️ 启动';
+                btn.className = 'btn warning';
+                indicator.className = 'refresh-indicator paused';
+                indicator.textContent = '⏸️ 自动刷新已暂停';
+                
+                stopAutoRefresh();
+                showMessage('⏸️ 自动刷新已暂停', 'warning', 2000);
+                debugLog('自动刷新已暂停');
+            }
+        }
+        
+        function changeRefreshInterval() {
+            const select = document.getElementById('refresh-interval');
+            RoomConfig.refreshInterval = parseInt(select.value);
+            
+            const indicator = document.getElementById('refresh-indicator');
+            if (RoomState.autoRefreshEnabled) {
+                indicator.textContent = `⏱️ 自动刷新: ${RoomConfig.refreshInterval/1000}秒`;
+                startAutoRefresh(); // 重启定时器
+            }
+            
+            debugLog('刷新间隔已更改', { interval: RoomConfig.refreshInterval });
+        }
+        
+        function startAutoRefresh() {
+            stopAutoRefresh();
+            
+            RoomState.updateInterval = setInterval(() => {
+                if (RoomState.autoRefreshEnabled && document.visibilityState === 'visible') {
+                    refreshAllData();
+                }
+            }, RoomConfig.refreshInterval);
+            
+            debugLog('自动刷新定时器已启动', { interval: RoomConfig.refreshInterval });
+        }
+        
+        function stopAutoRefresh() {
+            if (RoomState.updateInterval) {
+                clearInterval(RoomState.updateInterval);
+                RoomState.updateInterval = null;
+                debugLog('自动刷新定时器已停止');
+            }
+        }
+        
+        // ===== 事件监听器 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('房间详情页面加载完成', { roomId: RoomConfig.roomId });
+            
+            // 初始化现有弹幕和礼物的ID
+            document.querySelectorAll('.danmaku-item').forEach(item => {
+                const id = item.getAttribute('data-id');
+                if (id) RoomState.lastDanmakuIds.add(id);
+            });
+            
+            document.querySelectorAll('.gift-item').forEach(item => {
+                const id = item.getAttribute('data-id');
+                if (id) RoomState.lastGiftIds.add(id);
+            });
+            
+            // 初始化设置
+            updateScrollControls();
+            
+            // 绑定设置变更事件
+            document.getElementById('auto-scroll-top').addEventListener('change', function() {
+                RoomConfig.autoScrollTop = this.checked;
+                debugLog('自动置顶设置已更改', { enabled: this.checked });
+            });
+            
+            document.getElementById('show-scroll-controls').addEventListener('change', updateScrollControls);
+            
+            document.getElementById('highlight-new').addEventListener('change', function() {
+                RoomConfig.highlightNew = this.checked;
+                debugLog('新消息高亮设置已更改', { enabled: this.checked });
+            });
+            
+            // 延迟启动自动刷新
+            setTimeout(() => {
+                debugLog('开始初始化数据加载');
+                refreshAllData();
+                startAutoRefresh();
+            }, 1000);
+        });
+        
+        document.addEventListener('visibilitychange', function() {
+            const isVisible = document.visibilityState === 'visible';
+            debugLog('页面可见性变化', { visible: isVisible });
+            
+            if (isVisible && RoomState.autoRefreshEnabled) {
+                setTimeout(refreshAllData, 100);
+            }
+        });
+        
+        window.addEventListener('beforeunload', function() {
+            debugLog('页面即将卸载');
+            stopAutoRefresh();
+        });
+        
+        window.addEventListener('error', function(e) {
+            debugLog('JavaScript错误', { 
+                message: e.message, 
+                filename: e.filename, 
+                lineno: e.lineno 
+            });
+            showMessage(`❌ 页面错误: ${e.message}`, 'error', 5000);
+        });
+        
+        // 导出全局函数供调试使用
+        window.RoomDebug = {
+            RoomState,
+            RoomConfig,
+            refreshAllData,
+            clearAllData,
+            scrollToTop,
+            scrollToBottom,
+            debugLog
+        };
+        
+        debugLog('房间详情脚本初始化完成', RoomConfig);
+    </script>
+</body>
+</html>
